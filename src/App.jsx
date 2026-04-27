@@ -456,7 +456,7 @@ function Dashboard({go}){
   useEffect(()=>{
     (async()=>{
       const[e,p]=await Promise.all([
-        supabase.from("events").select("*").order("created_at",{ascending:false}).limit(5000),
+        supabase.from("events").select("*").order("created_at",{ascending:false}).limit(10000),
         supabase.from("profiles").select("*")
       ]);
       setEvents(e.data||[]);setProfiles(p.data||[]);setLoading(false);
@@ -465,44 +465,48 @@ function Dashboard({go}){
 
   if(loading)return <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#1a1a2e"}}><p style={{color:"#fff",fontFamily:"Montserrat,sans-serif"}}>Завантаження...</p></div>;
 
-  const cnt=ev=>events.filter(e=>e.event===ev).length;
-  const evData=(ev)=>events.filter(e=>e.event===ev);
+  // Helpers
+  const evOf=ev=>events.filter(e=>e.event===ev);
+  const uniqueOf=ev=>{const uids=new Set();evOf(ev).forEach(e=>{uids.add(e.user_id||e.id)});return uids.size};
+  const totalOf=ev=>evOf(ev).length;
+  const pageViews=events.filter(e=>e.event==="page_view"&&e.data?.page==="intro");
+  const atlasViews=events.filter(e=>e.event==="page_view"&&e.data?.page==="atlas");
 
-  // Funnel
-  const funnel=[
-    {l:"Відкрили додаток",n:cnt("page_view")||cnt("quiz_start")||events.length>0?Math.max(cnt("page_view"),cnt("quiz_start"),1):0},
-    {l:"Почали квіз",n:cnt("quiz_start")},
-    {l:"Відповіді на квіз",n:cnt("archquiz_answer")>0?Math.ceil(cnt("archquiz_answer")/18):0},
-    {l:"Отримали архетип",n:cnt("archetype_result")},
-    {l:"Зареєструвались",n:profiles.length},
-    {l:"Почали навчання",n:cnt("learn_start")},
-    {l:"Завершили навчання",n:cnt("learn_complete")},
-    {l:"Отримали бейдж",n:cnt("badge_earned")},
-    {l:"Відкрили Атлас",n:cnt("page_view")>0?evData("page_view").filter(e=>e.data?.page==="atlas").length:0},
-    {l:"Поділились",n:cnt("share_open")},
+  // Funnel with unique + total
+  const funnelSteps=[
+    {l:"Відкрили додаток",uniq:Math.max(new Set(pageViews.map(e=>e.user_id||e.id)).size,uniqueOf("quiz_start")),total:Math.max(pageViews.length,totalOf("quiz_start"))},
+    {l:"Почали квіз",uniq:uniqueOf("quiz_start"),total:totalOf("quiz_start")},
+    {l:"Завершили квіз",uniq:uniqueOf("archetype_result"),total:totalOf("archetype_result")},
+    {l:"Зареєструвались",uniq:profiles.length,total:profiles.length},
+    {l:"Почали навчання",uniq:uniqueOf("learn_start"),total:totalOf("learn_start")},
+    {l:"Завершили навчання",uniq:uniqueOf("learn_complete"),total:totalOf("learn_complete")},
+    {l:"Отримали бейдж",uniq:uniqueOf("badge_earned"),total:totalOf("badge_earned")},
+    {l:"Відкрили Атлас",uniq:new Set(atlasViews.map(e=>e.user_id||e.id)).size,total:atlasViews.length},
+    {l:"Поділились",uniq:uniqueOf("share_open"),total:totalOf("share_open")},
   ];
-  const funnelMax=Math.max(...funnel.map(f=>f.n),1);
 
   // Archetypes
   const archCounts={};
-  evData("archetype_result").forEach(e=>{const n=e.data?.name||"?";archCounts[n]=(archCounts[n]||0)+1});
+  evOf("archetype_result").forEach(e=>{const n=e.data?.name||"?";archCounts[n]=(archCounts[n]||0)+1});
   const archSorted=Object.entries(archCounts).sort((a,b)=>b[1]-a[1]);
 
-  // Quiz answers
+  // Quiz answers per question
   const quizAnswers={};
-  evData("archquiz_answer").forEach(e=>{const q=e.data?.q;const ch=e.data?.choice;if(q){if(!quizAnswers[q])quizAnswers[q]={pair:e.data?.pair,answers:{}};quizAnswers[q].answers[ch]=(quizAnswers[q].answers[ch]||0)+1}});
+  evOf("archquiz_answer").forEach(e=>{const q=e.data?.q;const ch=e.data?.choice;if(q){if(!quizAnswers[q])quizAnswers[q]={pair:e.data?.pair,answers:{},users:new Set()};quizAnswers[q].answers[ch]=(quizAnswers[q].answers[ch]||0)+1;quizAnswers[q].users.add(e.user_id||e.id)}});
 
   // Learning cards
   const learnCards={};
-  evData("learn_card").forEach(e=>{const k=`${e.data?.badge}:${e.data?.card}`;if(!learnCards[k])learnCards[k]={badge:e.data?.badge,card:e.data?.card,hook:e.data?.hook,knew:0,didnt:0};if(e.data?.knew)learnCards[k].knew++;else learnCards[k].didnt++});
+  evOf("learn_card").forEach(e=>{const k=`${e.data?.badge}:${e.data?.card}`;if(!learnCards[k])learnCards[k]={badge:e.data?.badge,card:e.data?.card,hook:e.data?.hook,knew:0,didnt:0,users:new Set()};if(e.data?.knew)learnCards[k].knew++;else learnCards[k].didnt++;learnCards[k].users.add(e.user_id||e.id)});
 
   // IQ quiz answers
   const iqAnswers={};
-  evData("iqquiz_answer").forEach(e=>{const k=`${e.data?.badge}:${e.data?.q}`;if(!iqAnswers[k])iqAnswers[k]={badge:e.data?.badge,q:e.data?.q,question:e.data?.question,correct:0,wrong:0};if(e.data?.correct)iqAnswers[k].correct++;else iqAnswers[k].wrong++});
+  evOf("iqquiz_answer").forEach(e=>{const k=`${e.data?.badge}:${e.data?.q}`;if(!iqAnswers[k])iqAnswers[k]={badge:e.data?.badge,q:e.data?.q,question:e.data?.question,correct:0,wrong:0,users:new Set()};if(e.data?.correct)iqAnswers[k].correct++;else iqAnswers[k].wrong++;iqAnswers[k].users.add(e.user_id||e.id)});
 
-  const S={bg:"#1a1a2e",card:"#16213e",accent:"#0f3460",blue:"#53a8e2",green:"#4ecca3",red:"#e74c3c",yellow:"#f39c12",text:"#eee",muted:"#888",font:"Montserrat,sans-serif"};
+  // Styles
+  const S={bg:"#1a1a2e",card:"#16213e",accent:"#0f3460",blue:"#53a8e2",green:"#4ecca3",red:"#e74c3c",yellow:"#f39c12",orange:"#e67e22",text:"#eee",muted:"#888",font:"Montserrat,sans-serif"};
   const Card=({title,children})=><div style={{background:S.card,borderRadius:12,padding:"16px",marginBottom:12}}><h3 style={{fontFamily:S.font,fontSize:12,fontWeight:600,letterSpacing:1.5,color:S.muted,marginBottom:12,textTransform:"uppercase"}}>{title}</h3>{children}</div>;
-  const Bar=({label,value,max,color=S.blue})=><div style={{marginBottom:8}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><span style={{fontFamily:S.font,fontSize:11,color:S.text}}>{label}</span><span style={{fontFamily:S.font,fontSize:11,fontWeight:700,color}}>{value}</span></div><div style={{height:6,background:S.accent,borderRadius:3,overflow:"hidden"}}><div style={{width:`${Math.max((value/max)*100,1)}%`,height:"100%",background:color,borderRadius:3}}/></div></div>;
+
+  const funnelMax=Math.max(...funnelSteps.map(f=>f.uniq),1);
 
   return <div style={{minHeight:"100vh",background:S.bg,padding:"20px",maxWidth:600,margin:"0 auto"}}>
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
@@ -511,55 +515,114 @@ function Dashboard({go}){
     </div>
 
     <Card title="Ключові метрики">
-      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,marginBottom:4}}>
-        {[{l:"Юзерів",n:profiles.length,c:S.blue},{l:"Архетипів",n:cnt("archetype_result"),c:S.green},{l:"Бейджів",n:cnt("badge_earned"),c:S.yellow}].map((m,i)=>
-          <div key={i} style={{background:S.accent,borderRadius:8,padding:"12px",textAlign:"center"}}>
-            <div style={{fontFamily:S.font,fontSize:24,fontWeight:700,color:m.c}}>{m.n}</div>
-            <div style={{fontFamily:S.font,fontSize:9,color:S.muted,marginTop:2}}>{m.l}</div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6}}>
+        {[{l:"Юзерів",n:profiles.length,c:S.blue},{l:"Квізів",n:totalOf("archetype_result"),c:S.green},{l:"Бейджів",n:totalOf("badge_earned"),c:S.yellow},{l:"Подій",n:events.length,c:S.orange}].map((m,i)=>
+          <div key={i} style={{background:S.accent,borderRadius:8,padding:"10px 4px",textAlign:"center"}}>
+            <div style={{fontFamily:S.font,fontSize:22,fontWeight:700,color:m.c}}>{m.n}</div>
+            <div style={{fontFamily:S.font,fontSize:8,color:S.muted,marginTop:2}}>{m.l}</div>
           </div>
         )}
       </div>
     </Card>
 
     <Card title="Воронка">
-      {funnel.map((f,i)=><Bar key={i} label={f.l} value={f.n} max={funnelMax} color={i<3?S.blue:i<6?S.green:S.yellow}/>)}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 60px 60px 60px",gap:0,marginBottom:8}}>
+        <span style={{fontFamily:S.font,fontSize:9,color:S.muted,fontWeight:600}}>КРОК</span>
+        <span style={{fontFamily:S.font,fontSize:9,color:S.muted,fontWeight:600,textAlign:"right"}}>УНІК.</span>
+        <span style={{fontFamily:S.font,fontSize:9,color:S.muted,fontWeight:600,textAlign:"right"}}>ВСЬОГО</span>
+        <span style={{fontFamily:S.font,fontSize:9,color:S.muted,fontWeight:600,textAlign:"right"}}>КОНВ.%</span>
+      </div>
+      {funnelSteps.map((f,i)=>{
+        const prev=i>0?funnelSteps[i-1].uniq:f.uniq;
+        const conv=prev>0?Math.round((f.uniq/prev)*100):0;
+        const barW=Math.max((f.uniq/funnelMax)*100,2);
+        const color=i<3?S.blue:i<6?S.green:S.yellow;
+        return <div key={i} style={{marginBottom:6}}>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 60px 60px 60px",gap:0,marginBottom:3}}>
+            <span style={{fontFamily:S.font,fontSize:11,color:S.text}}>{f.l}</span>
+            <span style={{fontFamily:S.font,fontSize:12,fontWeight:700,color,textAlign:"right"}}>{f.uniq}</span>
+            <span style={{fontFamily:S.font,fontSize:11,color:S.muted,textAlign:"right"}}>{f.total}</span>
+            <span style={{fontFamily:S.font,fontSize:11,color:i===0?"transparent":conv>=50?S.green:conv>=20?S.yellow:S.red,textAlign:"right"}}>{i===0?"":conv+"%"}</span>
+          </div>
+          <div style={{height:4,background:S.accent,borderRadius:2,overflow:"hidden"}}><div style={{width:`${barW}%`,height:"100%",background:color,borderRadius:2}}/></div>
+        </div>
+      })}
     </Card>
 
-    {archSorted.length>0&&<Card title="Архетипи">
-      {archSorted.map(([name,count],i)=><Bar key={i} label={name} value={count} max={archSorted[0][1]} color={S.green}/>)}
-    </Card>}
-
-    {Object.keys(quizAnswers).length>0&&<Card title="Квіз архетипу — відповіді">
-      {Object.entries(quizAnswers).sort((a,b)=>Number(a[0])-Number(b[0])).map(([q,data])=><div key={q} style={{marginBottom:12}}>
-        <p style={{fontFamily:S.font,fontSize:10,color:S.muted,margin:"0 0 4px"}}>Q{q}: {data.pair}</p>
-        {Object.entries(data.answers).sort((a,b)=>b[1]-a[1]).map(([ans,cnt],i)=><Bar key={i} label={ans} value={cnt} max={Math.max(...Object.values(data.answers))} color={i===0?S.blue:S.accent}/>)}
-      </div>)}
-    </Card>}
-
-    {Object.keys(learnCards).length>0&&<Card title="Навчальні картки">
-      {Object.values(learnCards).map((c,i)=><div key={i} style={{marginBottom:8,padding:"8px",background:S.accent,borderRadius:6}}>
-        <p style={{fontFamily:S.font,fontSize:10,color:S.text,margin:"0 0 4px"}}>{c.badge} #{c.card}: {c.hook}</p>
-        <div style={{display:"flex",gap:8}}>
-          <span style={{fontFamily:S.font,fontSize:10,color:S.green}}>✨ Знав: {c.knew}</span>
-          <span style={{fontFamily:S.font,fontSize:10,color:S.red}}>🤯 Не знав: {c.didnt}</span>
+    {archSorted.length>0&&<Card title="Розподіл архетипів">
+      {archSorted.map(([name,count],i)=><div key={i} style={{marginBottom:6}}>
+        <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
+          <span style={{fontFamily:S.font,fontSize:11,color:S.text}}>{name}</span>
+          <span style={{fontFamily:S.font,fontSize:11,fontWeight:700,color:S.green}}>{count} <span style={{color:S.muted,fontWeight:400}}>({Math.round(count/totalOf("archetype_result")*100)}%)</span></span>
         </div>
+        <div style={{height:4,background:S.accent,borderRadius:2,overflow:"hidden"}}><div style={{width:`${(count/archSorted[0][1])*100}%`,height:"100%",background:S.green,borderRadius:2}}/></div>
       </div>)}
     </Card>}
 
-    {Object.keys(iqAnswers).length>0&&<Card title="IQ квіз — відповіді">
-      {Object.values(iqAnswers).map((q,i)=><div key={i} style={{marginBottom:8,padding:"8px",background:S.accent,borderRadius:6}}>
-        <p style={{fontFamily:S.font,fontSize:10,color:S.text,margin:"0 0 4px"}}>{q.badge} Q{q.q}: {q.question}</p>
-        <div style={{display:"flex",gap:8}}>
-          <span style={{fontFamily:S.font,fontSize:10,color:S.green}}>✅ {q.correct}</span>
-          <span style={{fontFamily:S.font,fontSize:10,color:S.red}}>❌ {q.wrong}</span>
+    {Object.keys(quizAnswers).length>0&&<Card title="Квіз архетипу — відповіді по питаннях">
+      {Object.entries(quizAnswers).sort((a,b)=>Number(a[0])-Number(b[0])).map(([q,data])=>{
+        const total=Object.values(data.answers).reduce((s,v)=>s+v,0);
+        return <div key={q} style={{marginBottom:14,padding:"10px",background:S.accent,borderRadius:8}}>
+          <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
+            <span style={{fontFamily:S.font,fontSize:10,color:S.muted}}>Q{q}: {data.pair}</span>
+            <span style={{fontFamily:S.font,fontSize:9,color:S.muted}}>{data.users.size} юз.</span>
+          </div>
+          {Object.entries(data.answers).sort((a,b)=>b[1]-a[1]).map(([ans,cnt],i)=><div key={i} style={{marginBottom:4}}>
+            <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
+              <span style={{fontFamily:S.font,fontSize:10,color:S.text}}>{ans}</span>
+              <span style={{fontFamily:S.font,fontSize:10,color:i===0?S.blue:S.muted}}>{cnt} ({Math.round(cnt/total*100)}%)</span>
+            </div>
+            <div style={{height:3,background:"#0a1628",borderRadius:2,overflow:"hidden"}}><div style={{width:`${(cnt/total)*100}%`,height:"100%",background:i===0?S.blue:S.muted+"60",borderRadius:2}}/></div>
+          </div>)}
         </div>
-      </div>)}
+      })}
     </Card>}
 
-    <Card title="Останні події">
-      {events.slice(0,20).map((e,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"4px 0",borderBottom:`1px solid ${S.accent}`}}>
-        <span style={{fontFamily:S.font,fontSize:10,color:S.text}}>{e.event}</span>
-        <span style={{fontFamily:S.font,fontSize:9,color:S.muted}}>{new Date(e.created_at).toLocaleString("uk")}</span>
+    {Object.keys(learnCards).length>0&&<Card title="Навчальні картки — знав / не знав">
+      {Object.values(learnCards).sort((a,b)=>(a.badge+a.card).localeCompare(b.badge+b.card)).map((c,i)=>{
+        const total=c.knew+c.didnt;const knewPct=total>0?Math.round(c.knew/total*100):0;
+        return <div key={i} style={{marginBottom:6,padding:"8px 10px",background:S.accent,borderRadius:6}}>
+          <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
+            <span style={{fontFamily:S.font,fontSize:9,color:S.text}}>{c.badge} #{c.card}: {c.hook?.slice(0,40)}</span>
+            <span style={{fontFamily:S.font,fontSize:9,color:S.muted}}>{c.users.size} юз.</span>
+          </div>
+          <div style={{display:"flex",gap:6,alignItems:"center"}}>
+            <div style={{flex:1,height:6,background:"#0a1628",borderRadius:3,overflow:"hidden",display:"flex"}}>
+              <div style={{width:`${knewPct}%`,height:"100%",background:S.green}}/>
+              <div style={{width:`${100-knewPct}%`,height:"100%",background:S.red}}/>
+            </div>
+            <span style={{fontFamily:S.font,fontSize:9,color:S.green,minWidth:28}}>✨{c.knew}</span>
+            <span style={{fontFamily:S.font,fontSize:9,color:S.red,minWidth:28}}>🤯{c.didnt}</span>
+          </div>
+        </div>
+      })}
+    </Card>}
+
+    {Object.keys(iqAnswers).length>0&&<Card title="IQ квіз — правильність по питаннях">
+      {Object.values(iqAnswers).sort((a,b)=>(a.badge+a.q).localeCompare(b.badge+b.q)).map((q,i)=>{
+        const total=q.correct+q.wrong;const pct=total>0?Math.round(q.correct/total*100):0;
+        return <div key={i} style={{marginBottom:6,padding:"8px 10px",background:S.accent,borderRadius:6}}>
+          <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
+            <span style={{fontFamily:S.font,fontSize:9,color:S.text}}>{q.badge} Q{q.q}: {q.question?.slice(0,40)}</span>
+            <span style={{fontFamily:S.font,fontSize:9,color:S.muted}}>{q.users.size} юз.</span>
+          </div>
+          <div style={{display:"flex",gap:6,alignItems:"center"}}>
+            <div style={{flex:1,height:6,background:"#0a1628",borderRadius:3,overflow:"hidden",display:"flex"}}>
+              <div style={{width:`${pct}%`,height:"100%",background:S.green}}/>
+              <div style={{width:`${100-pct}%`,height:"100%",background:S.red}}/>
+            </div>
+            <span style={{fontFamily:S.font,fontSize:9,color:S.green,minWidth:28}}>✅{q.correct}</span>
+            <span style={{fontFamily:S.font,fontSize:9,color:S.red,minWidth:28}}>❌{q.wrong}</span>
+            <span style={{fontFamily:S.font,fontSize:9,color:pct>=70?S.green:pct>=40?S.yellow:S.red,minWidth:28}}>{pct}%</span>
+          </div>
+        </div>
+      })}
+    </Card>}
+
+    <Card title="Останні 30 подій">
+      {events.filter(e=>e.event!=="page_view"||e.data?.page).slice(0,30).map((e,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"3px 0",borderBottom:`1px solid ${S.accent}`}}>
+        <span style={{fontFamily:S.font,fontSize:9,color:S.text}}>{e.event}{e.data?.page?" ("+e.data.page+")":""}{e.data?.choice?" → "+e.data.choice:""}{e.data?.name?" → "+e.data.name:""}</span>
+        <span style={{fontFamily:S.font,fontSize:8,color:S.muted}}>{new Date(e.created_at).toLocaleString("uk")}</span>
       </div>)}
     </Card>
   </div>
