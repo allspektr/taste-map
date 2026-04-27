@@ -2,6 +2,9 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "./supabase";
 const C={ink:"#1C1710",paper:"#F7F3EC",paper2:"#EDE7DB",accent:"#C4460A",accent2:"#2A6B4A",accent3:"#1A4A6E",gold:"#B8860B",muted:"#9A8F7E",border:"#D8CFBF"};
 
+/* ═══ ANALYTICS ═══ */
+const track=async(event,data={})=>{try{const{data:{session}}=await supabase.auth.getSession();await supabase.from("events").insert({event,data,user_id:session?.user?.id||null})}catch(e){}};
+
 /* ═══ REBALANCED PAIRS ═══ */
 const PAIRS=[
 {a:{e:"🥩",l:"Стейк рібай",d:"Жар, скоринка"},b:{e:"🐟",l:"Севіче",d:"Сире, лайм"},w:{a:{heat:30,classic:15},b:{fresh:30,novel:15}}},
@@ -256,9 +259,9 @@ function AuthPrompt({onLogin,onSkip}){
 }
 
 /* ═══ SCREENS ═══ */
-function Intro({go}){return <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"100vh",padding:"40px 24px",textAlign:"center"}}><div style={{fontSize:72,marginBottom:24}}>🧬</div><h1 style={{fontFamily:"Cormorant Garamond,serif",fontSize:42,fontWeight:300,color:C.ink,margin:"0 0 8px",letterSpacing:4}}>СМАКОВА КАРТА</h1><div style={{width:40,height:2,background:C.accent,margin:"0 auto 20px"}}/><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:20,color:C.muted,fontStyle:"italic",margin:"0 0 40px",maxWidth:380,lineHeight:1.5}}>Обирай їжу — дізнайся хто ти</p><button onClick={go} style={{background:C.ink,color:C.paper,border:"none",borderRadius:10,padding:"16px 48px",fontFamily:"Cormorant Garamond,serif",fontSize:20,letterSpacing:2,cursor:"pointer"}}>ПОЧАТИ</button></div>}
+function Intro({go}){useEffect(()=>{track("page_view",{page:"intro"})},[]);return <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"100vh",padding:"40px 24px",textAlign:"center"}}><div style={{fontSize:72,marginBottom:24}}>🧬</div><h1 style={{fontFamily:"Cormorant Garamond,serif",fontSize:42,fontWeight:300,color:C.ink,margin:"0 0 8px",letterSpacing:4}}>СМАКОВА КАРТА</h1><div style={{width:40,height:2,background:C.accent,margin:"0 auto 20px"}}/><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:20,color:C.muted,fontStyle:"italic",margin:"0 0 40px",maxWidth:380,lineHeight:1.5}}>Обирай їжу — дізнайся хто ти</p><button onClick={()=>{track("quiz_start");go()}} style={{background:C.ink,color:C.paper,border:"none",borderRadius:10,padding:"16px 48px",fontFamily:"Cormorant Garamond,serif",fontSize:20,letterSpacing:2,cursor:"pointer"}}>ПОЧАТИ</button></div>}
 
-function AQuiz({onD}){const[s,ss]=useState(0);const[a,sa]=useState([]);const[am,sam]=useState(null);const p=PAIRS[s];const pk=sd=>{sam(sd);setTimeout(()=>{const n=[...a,sd];if(n.length>=18)onD(n);else{sa(n);ss(s+1);sam(null)}},280)};return <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",padding:"24px"}}><div style={{display:"flex",alignItems:"center",gap:12,marginBottom:28}}><div style={{flex:1,height:4,background:C.border,borderRadius:2,overflow:"hidden"}}><div style={{width:`${(s/18)*100}%`,height:"100%",background:C.accent,borderRadius:2,transition:"width .3s"}}/></div><span style={{fontFamily:"Montserrat,sans-serif",fontSize:13,color:C.muted,fontWeight:600}}>{s+1}/18</span></div><div style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"center",gap:16,maxWidth:420,margin:"0 auto",width:"100%"}}><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:20,color:C.ink,textAlign:"center",fontStyle:"italic",margin:0}}>Що обереш?</p>{["a","b"].map(sd=>{const o=p[sd],iA=am===sd,iO=am&&am!==sd;return <button key={sd} onClick={()=>!am&&pk(sd)} style={{background:"#fff",border:`2px solid ${iA?C.accent:C.border}`,borderRadius:16,padding:"24px",cursor:am?"default":"pointer",textAlign:"center",transition:"all .25s",display:"flex",flexDirection:"column",alignItems:"center",gap:5,transform:iA?"scale(1.04)":iO?"scale(.95)":"none",opacity:iO?.3:1}}><span style={{fontSize:44}}>{o.e}</span><span style={{fontFamily:"Cormorant Garamond,serif",fontSize:20,fontWeight:600,color:C.ink}}>{o.l}</span><span style={{fontFamily:"Montserrat,sans-serif",fontSize:11,color:C.muted}}>{o.d}</span></button>})}</div></div>}
+function AQuiz({onD}){const[s,ss]=useState(0);const[a,sa]=useState([]);const[am,sam]=useState(null);const p=PAIRS[s];const pk=sd=>{sam(sd);track("archquiz_answer",{q:s+1,pair:`${p.a.l} vs ${p.b.l}`,choice:sd==="a"?p.a.l:p.b.l});setTimeout(()=>{const n=[...a,sd];if(n.length>=18){track("archquiz_complete");onD(n)}else{sa(n);ss(s+1);sam(null)}},280)};return <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",padding:"24px"}}><div style={{display:"flex",alignItems:"center",gap:12,marginBottom:28}}><div style={{flex:1,height:4,background:C.border,borderRadius:2,overflow:"hidden"}}><div style={{width:`${(s/18)*100}%`,height:"100%",background:C.accent,borderRadius:2,transition:"width .3s"}}/></div><span style={{fontFamily:"Montserrat,sans-serif",fontSize:13,color:C.muted,fontWeight:600}}>{s+1}/18</span></div><div style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"center",gap:16,maxWidth:420,margin:"0 auto",width:"100%"}}><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:20,color:C.ink,textAlign:"center",fontStyle:"italic",margin:0}}>Що обереш?</p>{["a","b"].map(sd=>{const o=p[sd],iA=am===sd,iO=am&&am!==sd;return <button key={sd} onClick={()=>!am&&pk(sd)} style={{background:"#fff",border:`2px solid ${iA?C.accent:C.border}`,borderRadius:16,padding:"24px",cursor:am?"default":"pointer",textAlign:"center",transition:"all .25s",display:"flex",flexDirection:"column",alignItems:"center",gap:5,transform:iA?"scale(1.04)":iO?"scale(.95)":"none",opacity:iO?.3:1}}><span style={{fontSize:44}}>{o.e}</span><span style={{fontFamily:"Cormorant Garamond,serif",fontSize:20,fontWeight:600,color:C.ink}}>{o.l}</span><span style={{fontFamily:"Montserrat,sans-serif",fontSize:11,color:C.muted}}>{o.d}</span></button>})}</div></div>}
 
 function ProfileScr({arch,coins,bdgs,iq,learned,curBdg,expanded,setExpanded,go,onLearn,onBdg,onShare}){
   const nextB=bdgs[curBdg];
@@ -295,18 +298,19 @@ function BModal({b,bi,curBdg,onL,onQ,onC}){const done=b.done;const locked=bi>cur
   return <div style={{position:"fixed",inset:0,display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,background:"rgba(0,0,0,.4)"}} onClick={onC}><div onClick={e=>e.stopPropagation()} style={{background:"#fff",borderRadius:20,padding:"28px 24px",maxWidth:320,width:"90%",textAlign:"center"}}><div style={{fontSize:52,marginBottom:8}}>{b.e}</div><h3 style={{fontFamily:"Cormorant Garamond,serif",fontSize:22,color:C.ink,margin:"0 0 4px"}}>{b.n}</h3><p style={{fontFamily:"Montserrat,sans-serif",fontSize:11,color:C.muted,margin:"0 0 16px"}}>{b.cat}</p>{done&&<div style={{background:C.accent2+"12",borderRadius:10,padding:"8px",marginBottom:12}}><p style={{fontFamily:"Montserrat,sans-serif",fontSize:12,color:C.accent2,margin:0}}>✅ Квіз: {b.qs}/7</p></div>}{locked?<p style={{fontFamily:"Montserrat,sans-serif",fontSize:13,color:C.muted}}>🔒 Спершу пройди попередні бейджі</p>:<div style={{display:"flex",flexDirection:"column",gap:8}}><button onClick={onL} style={{background:C.accent,color:"#fff",border:"none",borderRadius:10,padding:"14px",cursor:"pointer",fontFamily:"Montserrat,sans-serif",fontSize:13,fontWeight:600}}>📚 Навчання (10 карток)</button>{(done||bi<=curBdg)&&<button onClick={onQ} style={{background:C.ink,color:C.paper,border:"none",borderRadius:10,padding:"14px",cursor:"pointer",fontFamily:"Montserrat,sans-serif",fontSize:13,fontWeight:600}}>🧠 Квіз (7 питань)</button>}</div>}<button onClick={onC} style={{background:"transparent",border:"none",color:C.muted,marginTop:12,cursor:"pointer",fontFamily:"Montserrat,sans-serif",fontSize:12}}>Закрити</button></div></div>}
 
 function Learn({badgeIdx,coins,setCn,onD,go}){const bd=BADGE_DATA[badgeIdx];const cards=bd?bd.cards:[];const[i,si]=useState(0);const[kn,skn]=useState(0);const[dk,sdk]=useState(0);const[am,sam]=useState(false);const[bt,sbt]=useState(false);const[exp,sexp]=useState(false);const F=5,lm=bt?cards.length:F,c=cards[i],isPay=i>=lm&&!bt;
-  const ans=k=>{sexp(false);if(k)skn(v=>v+1);else sdk(v=>v+1);sam(true);setTimeout(()=>{const nx=i+1;if(nx>=lm&&nx<cards.length&&!bt){si(nx);sam(false)}else if(nx>=cards.length){onD({knew:k?kn+1:kn,didnt:k?dk:dk+1,total:nx,allDone:true})}else{si(nx);sam(false)}},400)};
+  useEffect(()=>{track("learn_start",{badge:bd?.id})},[]);
+  const ans=k=>{sexp(false);track("learn_card",{badge:bd?.id,card:i+1,hook:c?.hook,knew:k});if(k)skn(v=>v+1);else sdk(v=>v+1);sam(true);setTimeout(()=>{const nx=i+1;if(nx>=lm&&nx<cards.length&&!bt){si(nx);sam(false)}else if(nx>=cards.length){track("learn_complete",{badge:bd?.id});onD({knew:k?kn+1:kn,didnt:k?dk:dk+1,total:nx,allDone:true})}else{si(nx);sam(false)}},400)};
   if(isPay)return <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"40px 24px",textAlign:"center"}}><div style={{fontSize:48,marginBottom:16}}>🔒</div><h2 style={{fontFamily:"Cormorant Garamond,serif",fontSize:24,color:C.ink,margin:"0 0 6px"}}>{F} карток пройдено!</h2><p style={{fontFamily:"Montserrat,sans-serif",fontSize:13,color:C.muted,margin:"0 0 20px"}}>Знав: {kn} · Нового: {dk}</p><div style={{display:"flex",flexDirection:"column",gap:10,width:"100%",maxWidth:300}}><button onClick={()=>{if(coins>=20){setCn(c=>c-20);sbt(true)}}} style={{background:C.gold+"15",border:`2px solid ${C.gold}`,borderRadius:12,padding:"14px",cursor:coins>=20?"pointer":"default",opacity:coins>=20?1:.5}}><span style={{fontFamily:"Montserrat,sans-serif",fontSize:13,fontWeight:600,color:C.gold}}>🪙 Ще 5 за 20 монет ({coins})</span></button><button style={{background:C.accent,color:"#fff",border:"none",borderRadius:12,padding:"14px",cursor:"pointer"}}><span style={{fontFamily:"Montserrat,sans-serif",fontSize:13,fontWeight:600}}>⭐ Підписка</span></button><button onClick={()=>onD({knew:kn,didnt:dk,total:i,allDone:false})} style={{color:C.muted,border:"none",background:"transparent",padding:"10px",cursor:"pointer",fontFamily:"Montserrat,sans-serif",fontSize:12}}>Завтра →</button></div></div>;
   if(!c)return null;
   return <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",padding:"24px",paddingBottom:80}}><div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}><div style={{flex:1,height:4,background:C.border,borderRadius:2,overflow:"hidden"}}><div style={{width:`${(i/cards.length)*100}%`,height:"100%",background:C.accent2,borderRadius:2,transition:"width .3s"}}/></div><span style={{fontFamily:"Montserrat,sans-serif",fontSize:13,color:C.muted,fontWeight:600}}>{i+1}/{cards.length}</span></div><div style={{display:"flex",justifyContent:"space-between",marginBottom:20}}><span style={{fontFamily:"Montserrat,sans-serif",fontSize:10,fontWeight:600,letterSpacing:2,color:C.accent2}}>{bd.e} {bd.n}</span><Cn n={coins}/></div><div style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"center",maxWidth:420,margin:"0 auto",width:"100%",opacity:am?0:1,transform:am?"translateX(-40px)":"none",transition:"all .3s"}}><div style={{background:"#fff",borderRadius:16,border:`1px solid ${C.border}`,overflow:"hidden",marginBottom:24}}><div style={{padding:"12px 20px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:16}}>{c.cat}</span><span style={{fontFamily:"Montserrat,sans-serif",fontSize:10,fontWeight:600,letterSpacing:1.5,color:C.muted,textTransform:"uppercase"}}>{c.tag}</span></div><div style={{padding:"20px 20px 12px"}}><h3 style={{fontFamily:"Cormorant Garamond,serif",fontSize:22,fontWeight:600,color:C.ink,margin:0,lineHeight:1.3}}>{c.hook}</h3></div><div style={{padding:"0 20px 16px"}}><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:15,color:C.ink+"cc",margin:0,lineHeight:1.6}}>{c.body}</p></div>{c.deep&&<div style={{padding:"0 20px 20px"}}>{!exp?<button onClick={()=>sexp(true)} style={{background:"transparent",border:"none",color:C.accent3,cursor:"pointer",fontFamily:"Montserrat,sans-serif",fontSize:12,fontWeight:600,padding:0}}>Детальніше ↓</button>:<div style={{background:C.accent3+"08",borderRadius:8,padding:"12px 14px"}}><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:14,color:C.ink+"bb",margin:0,lineHeight:1.6}}>{c.deep}</p></div>}</div>}</div><div style={{display:"flex",gap:12}}><button onClick={()=>ans(true)} style={{flex:1,background:"#fff",border:`2px solid ${C.accent2}`,borderRadius:12,padding:"18px",cursor:"pointer",textAlign:"center"}}><span style={{fontSize:28,display:"block",marginBottom:4}}>✨</span><span style={{fontFamily:"Montserrat,sans-serif",fontSize:14,fontWeight:600,color:C.accent2}}>Знав!</span></button><button onClick={()=>ans(false)} style={{flex:1,background:"#fff",border:`2px solid ${C.accent}`,borderRadius:12,padding:"18px",cursor:"pointer",textAlign:"center"}}><span style={{fontSize:28,display:"block",marginBottom:4}}>🤯</span><span style={{fontFamily:"Montserrat,sans-serif",fontSize:14,fontWeight:600,color:C.accent}}>Не знав!</span></button></div></div><BNav a="learn" go={go}/></div>}
 
-function IQQuiz({badgeIdx,onD}){const bd=BADGE_DATA[badgeIdx];const qs=bd?bd.quiz:[];const[i,si]=useState(0);const[sc,ssc]=useState(0);const[sel,ssel]=useState(null);const q=qs[i];if(!q)return null;const pk=j=>{ssel(j);const ok=j===q.ok;if(ok)ssc(s=>s+1);setTimeout(()=>{if(i+1>=qs.length)onD(ok?sc+1:sc);else{si(i+1);ssel(null)}},1200)};return <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",padding:"24px"}}><div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}><div style={{flex:1,height:4,background:C.border,borderRadius:2,overflow:"hidden"}}><div style={{width:`${(i/qs.length)*100}%`,height:"100%",background:C.gold,borderRadius:2,transition:"width .3s"}}/></div><span style={{fontFamily:"Montserrat,sans-serif",fontSize:13,color:C.muted,fontWeight:600}}>{i+1}/{qs.length}</span></div><div style={{fontFamily:"Montserrat,sans-serif",fontSize:10,fontWeight:600,letterSpacing:2,color:C.gold,textAlign:"center",marginBottom:20}}>🧠 {bd.e} {bd.n}</div><div style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"center",maxWidth:420,margin:"0 auto",width:"100%"}}><div style={{background:"#fff",borderRadius:14,padding:"20px",border:`1px solid ${C.border}`,marginBottom:16}}><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:18,color:C.ink,margin:0,lineHeight:1.5}}>{q.q}</p></div><div style={{display:"flex",flexDirection:"column",gap:8}}>{q.opts.map((o,j)=>{const iS=sel===j,isOk=j===q.ok,sh=sel!==null;let bg="#fff",bc=C.border,tc=C.ink;if(sh&&isOk){bg=C.accent2+"15";bc=C.accent2;tc=C.accent2}if(sh&&iS&&!isOk){bg="#e74c3c15";bc="#e74c3c";tc="#e74c3c"}return <button key={j} onClick={()=>sel===null&&pk(j)} style={{background:bg,border:`2px solid ${bc}`,borderRadius:12,padding:"14px 18px",cursor:sel===null?"pointer":"default",fontFamily:"Cormorant Garamond,serif",fontSize:16,color:tc,textAlign:"left",transition:"all .2s"}}>{o}{sh&&isOk?" ✅":""}{sh&&iS&&!isOk?" ❌":""}</button>})}</div></div></div>}
+function IQQuiz({badgeIdx,onD}){const bd=BADGE_DATA[badgeIdx];const qs=bd?bd.quiz:[];const[i,si]=useState(0);const[sc,ssc]=useState(0);const[sel,ssel]=useState(null);const q=qs[i];if(!q)return null;const pk=j=>{ssel(j);const ok=j===q.ok;track("iqquiz_answer",{badge:bd?.id,q:i+1,question:q.q,answer:q.opts[j],correct:ok});if(ok)ssc(s=>s+1);setTimeout(()=>{if(i+1>=qs.length){track("iqquiz_complete",{badge:bd?.id,score:ok?sc+1:sc});onD(ok?sc+1:sc)}else{si(i+1);ssel(null)}},1200)};return <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",padding:"24px"}}><div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}><div style={{flex:1,height:4,background:C.border,borderRadius:2,overflow:"hidden"}}><div style={{width:`${(i/qs.length)*100}%`,height:"100%",background:C.gold,borderRadius:2,transition:"width .3s"}}/></div><span style={{fontFamily:"Montserrat,sans-serif",fontSize:13,color:C.muted,fontWeight:600}}>{i+1}/{qs.length}</span></div><div style={{fontFamily:"Montserrat,sans-serif",fontSize:10,fontWeight:600,letterSpacing:2,color:C.gold,textAlign:"center",marginBottom:20}}>🧠 {bd.e} {bd.n}</div><div style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"center",maxWidth:420,margin:"0 auto",width:"100%"}}><div style={{background:"#fff",borderRadius:14,padding:"20px",border:`1px solid ${C.border}`,marginBottom:16}}><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:18,color:C.ink,margin:0,lineHeight:1.5}}>{q.q}</p></div><div style={{display:"flex",flexDirection:"column",gap:8}}>{q.opts.map((o,j)=>{const iS=sel===j,isOk=j===q.ok,sh=sel!==null;let bg="#fff",bc=C.border,tc=C.ink;if(sh&&isOk){bg=C.accent2+"15";bc=C.accent2;tc=C.accent2}if(sh&&iS&&!isOk){bg="#e74c3c15";bc="#e74c3c";tc="#e74c3c"}return <button key={j} onClick={()=>sel===null&&pk(j)} style={{background:bg,border:`2px solid ${bc}`,borderRadius:12,padding:"14px 18px",cursor:sel===null?"pointer":"default",fontFamily:"Cormorant Garamond,serif",fontSize:16,color:tc,textAlign:"left",transition:"all .2s"}}>{o}{sh&&isOk?" ✅":""}{sh&&iS&&!isOk?" ❌":""}</button>})}</div></div></div>}
 
 function RecPop({badgeIdx,onC}){const bd=BADGE_DATA[badgeIdx];const r=bd?.recipe;if(!r)return null;return <div style={{position:"fixed",inset:0,zIndex:200,background:"rgba(0,0,0,.5)",overflow:"auto"}} onClick={onC}><div onClick={e=>e.stopPropagation()} style={{background:C.paper,margin:"40px auto",maxWidth:420,borderRadius:20,overflow:"hidden"}}><div style={{background:C.ink,padding:"24px",textAlign:"center"}}><span style={{fontSize:48}}>{r.e}</span><h2 style={{fontFamily:"Cormorant Garamond,serif",fontSize:24,color:C.paper,margin:"8px 0 4px"}}>{r.t}</h2><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:14,color:C.gold,margin:0,fontStyle:"italic"}}>{r.sub}</p></div><div style={{padding:"20px"}}><div style={{background:C.accent2+"12",borderRadius:10,padding:"12px 16px",marginBottom:16}}><p style={{fontFamily:"Montserrat,sans-serif",fontSize:10,fontWeight:600,letterSpacing:1.5,color:C.accent2,margin:"0 0 6px"}}>ЧОМУ ЦЕ ПРАЦЮЄ</p><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:14,color:C.ink,margin:0,lineHeight:1.5}}>{r.why}</p></div><p style={{fontFamily:"Montserrat,sans-serif",fontSize:10,fontWeight:600,letterSpacing:1.5,color:C.muted,margin:"0 0 8px"}}>ІНГРЕДІЄНТИ</p>{r.ing.map((x,i)=><p key={i} style={{fontFamily:"Cormorant Garamond,serif",fontSize:14,color:C.ink,margin:"4px 0",paddingLeft:8,borderLeft:`2px solid ${C.border}`}}>{typeof x==="string"?x:`${x.q} ${x.n}`}</p>)}<p style={{fontFamily:"Montserrat,sans-serif",fontSize:10,fontWeight:600,letterSpacing:1.5,color:C.muted,margin:"16px 0 8px"}}>КРОКИ</p>{r.steps.map((s,i)=><div key={i} style={{marginBottom:12}}><div style={{display:"flex",gap:8}}><span style={{fontFamily:"Montserrat,sans-serif",fontSize:11,fontWeight:700,color:C.accent}}>{i+1}</span><span style={{fontFamily:"Montserrat,sans-serif",fontSize:12,fontWeight:600,color:C.ink}}>{s.t}</span></div><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:14,color:C.ink+"cc",margin:"2px 0 2px 20px"}}>{s.d}</p><p style={{fontFamily:"Montserrat,sans-serif",fontSize:11,color:C.accent2,margin:"2px 0 0 20px",fontStyle:"italic"}}>⚗ {s.s}</p></div>)}{r.tip&&<div style={{background:C.gold+"0f",borderRadius:10,padding:"12px 16px",marginTop:8}}><p style={{fontFamily:"Montserrat,sans-serif",fontSize:10,fontWeight:600,color:C.gold,margin:"0 0 4px"}}>💡 ПОРАДА</p><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:14,color:C.ink,margin:0}}>{r.tip}</p></div>}<button onClick={onC} style={{width:"100%",background:C.ink,color:C.paper,border:"none",borderRadius:10,padding:"14px",cursor:"pointer",fontFamily:"Montserrat,sans-serif",fontSize:14,fontWeight:600,marginTop:12}}>Закрити</button></div></div></div>}
 
 function LDone({stats,badgeIdx,onBack,onRec}){return <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"40px 24px",textAlign:"center"}}><div style={{fontSize:56,marginBottom:16}}>📚</div><h2 style={{fontFamily:"Cormorant Garamond,serif",fontSize:24,color:C.ink,margin:"0 0 4px"}}>Навчання завершено</h2><p style={{fontFamily:"Montserrat,sans-serif",fontSize:13,color:C.muted,margin:"0 0 20px"}}>Знав: {stats.knew} · Нового: {stats.didnt}</p>{BADGE_DATA[badgeIdx]?.recipe&&<button onClick={onRec} style={{background:"#fff",borderRadius:14,border:`1px solid ${C.border}`,padding:"16px",marginBottom:16,maxWidth:320,width:"100%",cursor:"pointer",textAlign:"left"}}><div style={{display:"flex",alignItems:"center",gap:10}}><span style={{fontSize:28}}>{BADGE_DATA[badgeIdx].recipe.e}</span><div><p style={{fontFamily:"Montserrat,sans-serif",fontSize:9,fontWeight:600,letterSpacing:1.5,color:C.accent,margin:0}}>РЕЦЕПТ</p><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:16,fontWeight:600,color:C.ink,margin:0}}>{BADGE_DATA[badgeIdx].recipe.t}</p></div></div></button>}{stats.allDone&&<div style={{background:C.gold+"15",borderRadius:12,padding:"12px 20px",marginBottom:16,maxWidth:320}}><p style={{fontFamily:"Montserrat,sans-serif",fontSize:13,color:C.gold,margin:0,fontWeight:600}}>🧠 Квіз розблоковано!</p></div>}<button onClick={onBack} style={{background:C.ink,color:C.paper,border:"none",borderRadius:10,padding:"14px 36px",fontFamily:"Cormorant Garamond,serif",fontSize:18,cursor:"pointer"}}>{stats.allDone?"Пройти квіз →":"До профілю →"}</button></div>}
 
-function AtlasHome({go,goAtlas}){return <div style={{minHeight:"100vh",padding:"24px 24px 90px"}}><h2 style={{fontFamily:"Cormorant Garamond,serif",fontSize:28,color:C.ink,margin:"40px 0 12px",textAlign:"center"}}>🗺️ Кулінарний Атлас</h2><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:16,color:C.muted,fontStyle:"italic",textAlign:"center",margin:"0 0 24px"}}>Один продукт — цілий всесвіт</p><button onClick={goAtlas} style={{width:"100%",background:"#fff",borderRadius:14,border:`1px solid ${C.border}`,padding:"20px",marginBottom:12,cursor:"pointer",textAlign:"left"}}><div style={{display:"flex",alignItems:"center",gap:12}}><span style={{fontSize:36}}>🥩</span><div><h3 style={{fontFamily:"Cormorant Garamond,serif",fontSize:18,color:C.ink,margin:0}}>Яловичина</h3><p style={{fontFamily:"Montserrat,sans-serif",fontSize:11,color:C.accent2,margin:0}}>6 груп · 10 трансформацій</p></div></div></button>{["🐔 Курятина","🐟 Лосось","🥚 Яйця","🍄 Гриби"].map((p,i)=><div key={i} style={{background:C.paper2,borderRadius:14,border:`1px solid ${C.border}`,padding:"16px 20px",marginBottom:8,opacity:.5}}><span style={{fontFamily:"Cormorant Garamond,serif",fontSize:16,color:C.muted}}>{p} — скоро</span></div>)}<BNav a="atlas" go={go}/></div>}
+function AtlasHome({go,goAtlas}){useEffect(()=>{track("page_view",{page:"atlas"})},[]);return <div style={{minHeight:"100vh",padding:"24px 24px 90px"}}><h2 style={{fontFamily:"Cormorant Garamond,serif",fontSize:28,color:C.ink,margin:"40px 0 12px",textAlign:"center"}}>🗺️ Кулінарний Атлас</h2><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:16,color:C.muted,fontStyle:"italic",textAlign:"center",margin:"0 0 24px"}}>Один продукт — цілий всесвіт</p><button onClick={goAtlas} style={{width:"100%",background:"#fff",borderRadius:14,border:`1px solid ${C.border}`,padding:"20px",marginBottom:12,cursor:"pointer",textAlign:"left"}}><div style={{display:"flex",alignItems:"center",gap:12}}><span style={{fontSize:36}}>🥩</span><div><h3 style={{fontFamily:"Cormorant Garamond,serif",fontSize:18,color:C.ink,margin:0}}>Яловичина</h3><p style={{fontFamily:"Montserrat,sans-serif",fontSize:11,color:C.accent2,margin:0}}>6 груп · 10 трансформацій</p></div></div></button>{["🐔 Курятина","🐟 Лосось","🥚 Яйця","🍄 Гриби"].map((p,i)=><div key={i} style={{background:C.paper2,borderRadius:14,border:`1px solid ${C.border}`,padding:"16px 20px",marginBottom:8,opacity:.5}}><span style={{fontFamily:"Cormorant Garamond,serif",fontSize:16,color:C.muted}}>{p} — скоро</span></div>)}<BNav a="atlas" go={go}/></div>}
 
 function AtlasProduct({go}){const[openG,sog]=useState(null);const p=BEEF_PASSPORT;
 return <div style={{minHeight:"100vh",padding:"0 0 90px"}}><div style={{background:C.ink,padding:"24px 20px 20px"}}><button onClick={()=>go("atlas")} style={{background:"transparent",border:"none",color:C.muted,cursor:"pointer",fontFamily:"Montserrat,sans-serif",fontSize:12,marginBottom:12}}>← Назад</button><div style={{textAlign:"center"}}><span style={{fontSize:48}}>🥩</span><h2 style={{fontFamily:"Cormorant Garamond,serif",fontSize:28,color:C.paper,margin:"8px 0 4px"}}>Яловичина</h2><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:14,color:C.gold,margin:0,fontStyle:"italic"}}>{p.tagline}</p><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:13,color:C.paper+"bb",margin:"10px auto 0",maxWidth:360,lineHeight:1.5}}>{p.desc}</p></div></div>
@@ -410,6 +414,11 @@ export default function App(){
   const go=s=>{ss(s);sab(null);window.scrollTo(0,0)};
   const addC=(n,t)=>{sc(c=>c+n);sp({amt:n,txt:t})};
 
+  // Dashboard access: /dashboard or ?admin
+  useEffect(()=>{
+    if(window.location.hash==="#dashboard"||window.location.search.includes("admin"))ss("dashboard");
+  },[]);
+
   // Auth button component
   const AuthBtn=()=>user?
     <button onClick={logout} style={{position:"fixed",top:8,right:8,zIndex:150,background:"#fff",border:`1px solid ${C.border}`,borderRadius:20,padding:"6px 14px",cursor:"pointer",display:"flex",alignItems:"center",gap:6}}>
@@ -430,12 +439,128 @@ export default function App(){
     {showShare&&arch&&<ShareCard arch={arch} onC={()=>setShowShare(false)}/>}
     {actB&&scr==="profile"&&<BModal b={actB} bi={actBi} curBdg={curBdg} onL={()=>{sab(null);go("learn")}} onQ={()=>{sab(null);go("iqquiz")}} onC={()=>sab(null)}/>}
     {scr==="intro"&&<Intro go={()=>{addC(100,"Ласкаво просимо!");setTimeout(()=>go("archquiz"),1900)}}/>}
-    {scr==="archquiz"&&<AQuiz onD={a=>{sa(calc(a));addC(50,"Архетип визначено!");setTimeout(()=>{go("profile");if(!user)setShowAuth(true);else setShowShare(true)},1900)}}/>}
-    {scr==="profile"&&arch&&<ProfileScr arch={arch} coins={coins} bdgs={bdgs} iq={iq} learned={learned} curBdg={curBdg} expanded={archExp} setExpanded={sae} go={go} onLearn={()=>{sae(false);go("learn")}} onBdg={(b,i)=>{sab(b);sabi(i)}} onShare={()=>setShowShare(true)}/>}
+    {scr==="archquiz"&&<AQuiz onD={a=>{const r=calc(a);sa(r);track("archetype_result",{archetype:r.id,name:r.n});addC(50,"Архетип визначено!");setTimeout(()=>{go("profile");if(!user)setShowAuth(true);else setShowShare(true)},1900)}}/>}
+    {scr==="profile"&&arch&&<ProfileScr arch={arch} coins={coins} bdgs={bdgs} iq={iq} learned={learned} curBdg={curBdg} expanded={archExp} setExpanded={sae} go={go} onLearn={()=>{sae(false);track("learn_navigate",{badge:BADGE_DATA[curBdg]?.id});go("learn")}} onBdg={(b,i)=>{sab(b);sabi(i)}} onShare={()=>{track("share_open");setShowShare(true)}}/>}
     {scr==="learn"&&<Learn badgeIdx={curBdg} coins={coins} setCn={sc} go={go} onD={s=>{sls(s);sl(l=>l+s.total);go("ldone")}}/>}
     {scr==="ldone"&&lSt&&<LDone stats={lSt} badgeIdx={curBdg} onRec={()=>ssr(true)} onBack={()=>{if(lSt.allDone){go("iqquiz")}else go("profile")}}/>}
-    {scr==="iqquiz"&&<IQQuiz badgeIdx={curBdg} onD={score=>{const g=score*20;si(v=>v+g);sb(bs=>bs.map((b,i)=>i===curBdg?{...b,done:true,qs:score}:b));scb(c=>Math.min(c+1,BADGE_DATA.length-1));sae(false);sp({amt:0,txt:`${bdgs[curBdg]?.e} Бейдж "${bdgs[curBdg]?.n}" отримано!`});setTimeout(()=>go("profile"),1900)}}/>}
-    {scr==="atlas"&&<AtlasHome go={go} goAtlas={()=>go("atlas-product")}/>}
+    {scr==="iqquiz"&&<IQQuiz badgeIdx={curBdg} onD={score=>{const g=score*20;si(v=>v+g);sb(bs=>bs.map((b,i)=>i===curBdg?{...b,done:true,qs:score}:b));scb(c=>Math.min(c+1,BADGE_DATA.length-1));sae(false);track("badge_earned",{badge:bdgs[curBdg]?.id,name:bdgs[curBdg]?.n,score});sp({amt:0,txt:`${bdgs[curBdg]?.e} Бейдж "${bdgs[curBdg]?.n}" отримано!`});setTimeout(()=>go("profile"),1900)}}/>}
+    {scr==="atlas"&&<AtlasHome go={go} goAtlas={()=>{track("atlas_product",{product:"beef"});go("atlas-product")}}/>}
     {scr==="atlas-product"&&<AtlasProduct go={go}/>}
+    {scr==="dashboard"&&<Dashboard go={go}/>}
+  </div>
+}
+
+/* ═══ DASHBOARD ═══ */
+function Dashboard({go}){
+  const[events,setEvents]=useState([]);const[profiles,setProfiles]=useState([]);const[loading,setLoading]=useState(true);
+  useEffect(()=>{
+    (async()=>{
+      const[e,p]=await Promise.all([
+        supabase.from("events").select("*").order("created_at",{ascending:false}).limit(5000),
+        supabase.from("profiles").select("*")
+      ]);
+      setEvents(e.data||[]);setProfiles(p.data||[]);setLoading(false);
+    })();
+  },[]);
+
+  if(loading)return <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#1a1a2e"}}><p style={{color:"#fff",fontFamily:"Montserrat,sans-serif"}}>Завантаження...</p></div>;
+
+  const cnt=ev=>events.filter(e=>e.event===ev).length;
+  const evData=(ev)=>events.filter(e=>e.event===ev);
+
+  // Funnel
+  const funnel=[
+    {l:"Відкрили додаток",n:cnt("page_view")||cnt("quiz_start")||events.length>0?Math.max(cnt("page_view"),cnt("quiz_start"),1):0},
+    {l:"Почали квіз",n:cnt("quiz_start")},
+    {l:"Відповіді на квіз",n:cnt("archquiz_answer")>0?Math.ceil(cnt("archquiz_answer")/18):0},
+    {l:"Отримали архетип",n:cnt("archetype_result")},
+    {l:"Зареєструвались",n:profiles.length},
+    {l:"Почали навчання",n:cnt("learn_start")},
+    {l:"Завершили навчання",n:cnt("learn_complete")},
+    {l:"Отримали бейдж",n:cnt("badge_earned")},
+    {l:"Відкрили Атлас",n:cnt("page_view")>0?evData("page_view").filter(e=>e.data?.page==="atlas").length:0},
+    {l:"Поділились",n:cnt("share_open")},
+  ];
+  const funnelMax=Math.max(...funnel.map(f=>f.n),1);
+
+  // Archetypes
+  const archCounts={};
+  evData("archetype_result").forEach(e=>{const n=e.data?.name||"?";archCounts[n]=(archCounts[n]||0)+1});
+  const archSorted=Object.entries(archCounts).sort((a,b)=>b[1]-a[1]);
+
+  // Quiz answers
+  const quizAnswers={};
+  evData("archquiz_answer").forEach(e=>{const q=e.data?.q;const ch=e.data?.choice;if(q){if(!quizAnswers[q])quizAnswers[q]={pair:e.data?.pair,answers:{}};quizAnswers[q].answers[ch]=(quizAnswers[q].answers[ch]||0)+1}});
+
+  // Learning cards
+  const learnCards={};
+  evData("learn_card").forEach(e=>{const k=`${e.data?.badge}:${e.data?.card}`;if(!learnCards[k])learnCards[k]={badge:e.data?.badge,card:e.data?.card,hook:e.data?.hook,knew:0,didnt:0};if(e.data?.knew)learnCards[k].knew++;else learnCards[k].didnt++});
+
+  // IQ quiz answers
+  const iqAnswers={};
+  evData("iqquiz_answer").forEach(e=>{const k=`${e.data?.badge}:${e.data?.q}`;if(!iqAnswers[k])iqAnswers[k]={badge:e.data?.badge,q:e.data?.q,question:e.data?.question,correct:0,wrong:0};if(e.data?.correct)iqAnswers[k].correct++;else iqAnswers[k].wrong++});
+
+  const S={bg:"#1a1a2e",card:"#16213e",accent:"#0f3460",blue:"#53a8e2",green:"#4ecca3",red:"#e74c3c",yellow:"#f39c12",text:"#eee",muted:"#888",font:"Montserrat,sans-serif"};
+  const Card=({title,children})=><div style={{background:S.card,borderRadius:12,padding:"16px",marginBottom:12}}><h3 style={{fontFamily:S.font,fontSize:12,fontWeight:600,letterSpacing:1.5,color:S.muted,marginBottom:12,textTransform:"uppercase"}}>{title}</h3>{children}</div>;
+  const Bar=({label,value,max,color=S.blue})=><div style={{marginBottom:8}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><span style={{fontFamily:S.font,fontSize:11,color:S.text}}>{label}</span><span style={{fontFamily:S.font,fontSize:11,fontWeight:700,color}}>{value}</span></div><div style={{height:6,background:S.accent,borderRadius:3,overflow:"hidden"}}><div style={{width:`${Math.max((value/max)*100,1)}%`,height:"100%",background:color,borderRadius:3}}/></div></div>;
+
+  return <div style={{minHeight:"100vh",background:S.bg,padding:"20px",maxWidth:600,margin:"0 auto"}}>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+      <h1 style={{fontFamily:"Cormorant Garamond,serif",fontSize:24,color:S.text,margin:0}}>📊 Дашборд</h1>
+      <button onClick={()=>go("profile")} style={{background:S.card,border:"none",color:S.muted,borderRadius:8,padding:"6px 12px",cursor:"pointer",fontFamily:S.font,fontSize:11}}>← Назад</button>
+    </div>
+
+    <Card title="Ключові метрики">
+      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,marginBottom:4}}>
+        {[{l:"Юзерів",n:profiles.length,c:S.blue},{l:"Архетипів",n:cnt("archetype_result"),c:S.green},{l:"Бейджів",n:cnt("badge_earned"),c:S.yellow}].map((m,i)=>
+          <div key={i} style={{background:S.accent,borderRadius:8,padding:"12px",textAlign:"center"}}>
+            <div style={{fontFamily:S.font,fontSize:24,fontWeight:700,color:m.c}}>{m.n}</div>
+            <div style={{fontFamily:S.font,fontSize:9,color:S.muted,marginTop:2}}>{m.l}</div>
+          </div>
+        )}
+      </div>
+    </Card>
+
+    <Card title="Воронка">
+      {funnel.map((f,i)=><Bar key={i} label={f.l} value={f.n} max={funnelMax} color={i<3?S.blue:i<6?S.green:S.yellow}/>)}
+    </Card>
+
+    {archSorted.length>0&&<Card title="Архетипи">
+      {archSorted.map(([name,count],i)=><Bar key={i} label={name} value={count} max={archSorted[0][1]} color={S.green}/>)}
+    </Card>}
+
+    {Object.keys(quizAnswers).length>0&&<Card title="Квіз архетипу — відповіді">
+      {Object.entries(quizAnswers).sort((a,b)=>Number(a[0])-Number(b[0])).map(([q,data])=><div key={q} style={{marginBottom:12}}>
+        <p style={{fontFamily:S.font,fontSize:10,color:S.muted,margin:"0 0 4px"}}>Q{q}: {data.pair}</p>
+        {Object.entries(data.answers).sort((a,b)=>b[1]-a[1]).map(([ans,cnt],i)=><Bar key={i} label={ans} value={cnt} max={Math.max(...Object.values(data.answers))} color={i===0?S.blue:S.accent}/>)}
+      </div>)}
+    </Card>}
+
+    {Object.keys(learnCards).length>0&&<Card title="Навчальні картки">
+      {Object.values(learnCards).map((c,i)=><div key={i} style={{marginBottom:8,padding:"8px",background:S.accent,borderRadius:6}}>
+        <p style={{fontFamily:S.font,fontSize:10,color:S.text,margin:"0 0 4px"}}>{c.badge} #{c.card}: {c.hook}</p>
+        <div style={{display:"flex",gap:8}}>
+          <span style={{fontFamily:S.font,fontSize:10,color:S.green}}>✨ Знав: {c.knew}</span>
+          <span style={{fontFamily:S.font,fontSize:10,color:S.red}}>🤯 Не знав: {c.didnt}</span>
+        </div>
+      </div>)}
+    </Card>}
+
+    {Object.keys(iqAnswers).length>0&&<Card title="IQ квіз — відповіді">
+      {Object.values(iqAnswers).map((q,i)=><div key={i} style={{marginBottom:8,padding:"8px",background:S.accent,borderRadius:6}}>
+        <p style={{fontFamily:S.font,fontSize:10,color:S.text,margin:"0 0 4px"}}>{q.badge} Q{q.q}: {q.question}</p>
+        <div style={{display:"flex",gap:8}}>
+          <span style={{fontFamily:S.font,fontSize:10,color:S.green}}>✅ {q.correct}</span>
+          <span style={{fontFamily:S.font,fontSize:10,color:S.red}}>❌ {q.wrong}</span>
+        </div>
+      </div>)}
+    </Card>}
+
+    <Card title="Останні події">
+      {events.slice(0,20).map((e,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"4px 0",borderBottom:`1px solid ${S.accent}`}}>
+        <span style={{fontFamily:S.font,fontSize:10,color:S.text}}>{e.event}</span>
+        <span style={{fontFamily:S.font,fontSize:9,color:S.muted}}>{new Date(e.created_at).toLocaleString("uk")}</span>
+      </div>)}
+    </Card>
   </div>
 }
