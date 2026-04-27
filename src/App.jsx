@@ -183,12 +183,68 @@ const Cn=({n})=><div style={{background:C.gold+"18",borderRadius:20,padding:"5px
 function Pop({amt,txt,onD}){const[v,sv]=useState(true);useEffect(()=>{setTimeout(()=>{sv(false);setTimeout(onD,300)},1800)},[]);return <div style={{position:"fixed",inset:0,display:"flex",alignItems:"center",justifyContent:"center",zIndex:999,background:"rgba(0,0,0,.3)",opacity:v?1:0,transition:"opacity .3s",pointerEvents:"none"}}><div style={{background:"#fff",borderRadius:20,padding:"28px 36px",textAlign:"center",transform:v?"scale(1)":"scale(.8)",transition:"transform .3s"}}><div style={{fontSize:44,marginBottom:6}}>{amt>0?"🪙":"🏆"}</div><div style={{fontFamily:"Cormorant Garamond,serif",fontSize:amt>0?28:20,fontWeight:600,color:amt>0?C.gold:C.accent2,marginTop:6}}>{amt>0?`+${amt}`:txt}</div>{amt>0&&<div style={{fontFamily:"Montserrat,sans-serif",fontSize:12,color:C.muted,marginTop:4}}>{txt}</div>}</div></div>}
 function BNav({a,go}){return <div style={{position:"fixed",bottom:0,left:0,right:0,background:"#fff",borderTop:`1px solid ${C.border}`,display:"flex",zIndex:100,paddingBottom:"env(safe-area-inset-bottom)"}}>{[{id:"learn",e:"📚",l:"Навчання"},{id:"profile",e:"🧬",l:"Профіль"},{id:"atlas",e:"🗺️",l:"Атлас"}].map(t=><button key={t.id} onClick={()=>go(t.id)} style={{flex:1,border:"none",background:"transparent",padding:"10px 0 8px",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:2}}><span style={{fontSize:20}}>{t.e}</span><span style={{fontFamily:"Montserrat,sans-serif",fontSize:9,fontWeight:a===t.id?700:400,color:a===t.id?C.accent:C.muted}}>{t.l}</span></button>)}</div>}
 
+/* ═══ SHARE ═══ */
+function ShareCard({arch,onC}){
+  const[copied,setCopied]=useState(false);
+  const url="https://taste-map-liart.vercel.app";
+  const copyLink=()=>{navigator.clipboard.writeText(url+"?ref=share").then(()=>{setCopied(true);setTimeout(()=>setCopied(false),2000)})};
+  const shareNative=()=>{if(navigator.share)navigator.share({title:"Смакова Карта",text:`Мій кулінарний архетип — ${arch.e} ${arch.n}. Дізнайся свій!`,url:url+"?ref=share"}).catch(()=>{});else copyLink()};
+  const downloadCard=()=>{
+    const cv=document.createElement("canvas");cv.width=1080;cv.height=1920;const ctx=cv.getContext("2d");
+    // Background
+    ctx.fillStyle="#1C1710";ctx.fillRect(0,0,1080,1920);
+    // Decorative line
+    ctx.fillStyle="#C4460A";ctx.fillRect(490,280,100,3);
+    // Emoji
+    ctx.font="120px serif";ctx.textAlign="center";ctx.fillText(arch.e,540,480);
+    // Title
+    ctx.fillStyle="#F7F3EC";ctx.font="600 64px Cormorant Garamond, serif";ctx.fillText(arch.n,540,600);
+    // Desc
+    ctx.font="italic 32px Cormorant Garamond, serif";ctx.fillStyle="#F7F3EC99";
+    const words=arch.d.split(" ");let line="";let y=700;
+    words.forEach(w=>{const test=line+w+" ";if(ctx.measureText(test).width>800){ctx.fillText(line.trim(),540,y);y+=44;line=w+" "}else line=test});
+    if(line)ctx.fillText(line.trim(),540,y);
+    // Superpower
+    y+=80;ctx.fillStyle="#B8860B";ctx.font="600 20px Montserrat, sans-serif";ctx.fillText("СУПЕРСИЛА",540,y);
+    y+=44;ctx.fillStyle="#F7F3EC";ctx.font="28px Cormorant Garamond, serif";
+    const sw=arch.sup.split(" ");line="";
+    sw.forEach(w=>{const test=line+w+" ";if(ctx.measureText(test).width>750){ctx.fillText(line.trim(),540,y);y+=40;line=w+" "}else line=test});
+    if(line)ctx.fillText(line.trim(),540,y);
+    // Footer
+    ctx.fillStyle="#9A8F7E";ctx.font="24px Montserrat, sans-serif";ctx.fillText("🧬 СМАКОВА КАРТА",540,1720);
+    ctx.font="20px Montserrat, sans-serif";ctx.fillText("taste-map-liart.vercel.app",540,1760);
+    // Download
+    const a=document.createElement("a");a.download=`taste-map-${arch.id}.png`;a.href=cv.toDataURL("image/png");a.click();
+  };
+  return <div style={{position:"fixed",inset:0,zIndex:250,background:"rgba(0,0,0,.6)",display:"flex",alignItems:"center",justifyContent:"center"}} onClick={onC}>
+    <div onClick={e=>e.stopPropagation()} style={{background:C.ink,borderRadius:20,padding:"32px 24px",maxWidth:340,width:"90%",textAlign:"center"}}>
+      <div style={{fontSize:64,marginBottom:8}}>{arch.e}</div>
+      <p style={{fontFamily:"Montserrat,sans-serif",fontSize:9,fontWeight:600,letterSpacing:2,color:C.gold,margin:"0 0 4px"}}>ТВІЙ АРХЕТИП</p>
+      <h2 style={{fontFamily:"Cormorant Garamond,serif",fontSize:28,fontWeight:400,color:C.paper,margin:"0 0 8px"}}>{arch.n}</h2>
+      <p style={{fontFamily:"Cormorant Garamond,serif",fontSize:14,color:C.paper+"99",fontStyle:"italic",margin:"0 0 16px",lineHeight:1.5}}>{arch.d}</p>
+      <div style={{background:C.gold+"15",borderRadius:10,padding:"10px 14px",marginBottom:20}}>
+        <p style={{fontFamily:"Montserrat,sans-serif",fontSize:9,fontWeight:600,letterSpacing:1.5,color:C.gold,margin:"0 0 4px"}}>СУПЕРСИЛА</p>
+        <p style={{fontFamily:"Cormorant Garamond,serif",fontSize:13,color:C.paper,margin:0}}>{arch.sup}</p>
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:8}}>
+        <button onClick={shareNative} style={{background:C.accent,color:"#fff",border:"none",borderRadius:10,padding:"14px",cursor:"pointer",fontFamily:"Montserrat,sans-serif",fontSize:13,fontWeight:600}}>
+          {copied?"✅ Скопійовано!":"📤 Поділитись посиланням"}
+        </button>
+        <button onClick={downloadCard} style={{background:"#fff",color:C.ink,border:"none",borderRadius:10,padding:"14px",cursor:"pointer",fontFamily:"Montserrat,sans-serif",fontSize:13,fontWeight:600}}>
+          📱 Зберегти картку для Stories
+        </button>
+        <button onClick={onC} style={{background:"transparent",border:"none",color:C.muted,marginTop:4,cursor:"pointer",fontFamily:"Montserrat,sans-serif",fontSize:12}}>Закрити</button>
+      </div>
+    </div>
+  </div>
+}
+
 /* ═══ SCREENS ═══ */
 function Intro({go}){return <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"100vh",padding:"40px 24px",textAlign:"center"}}><div style={{fontSize:72,marginBottom:24}}>🧬</div><h1 style={{fontFamily:"Cormorant Garamond,serif",fontSize:42,fontWeight:300,color:C.ink,margin:"0 0 8px",letterSpacing:4}}>СМАКОВА КАРТА</h1><div style={{width:40,height:2,background:C.accent,margin:"0 auto 20px"}}/><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:20,color:C.muted,fontStyle:"italic",margin:"0 0 40px",maxWidth:380,lineHeight:1.5}}>Обирай їжу — дізнайся хто ти</p><button onClick={go} style={{background:C.ink,color:C.paper,border:"none",borderRadius:10,padding:"16px 48px",fontFamily:"Cormorant Garamond,serif",fontSize:20,letterSpacing:2,cursor:"pointer"}}>ПОЧАТИ</button></div>}
 
 function AQuiz({onD}){const[s,ss]=useState(0);const[a,sa]=useState([]);const[am,sam]=useState(null);const p=PAIRS[s];const pk=sd=>{sam(sd);setTimeout(()=>{const n=[...a,sd];if(n.length>=18)onD(n);else{sa(n);ss(s+1);sam(null)}},280)};return <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",padding:"24px"}}><div style={{display:"flex",alignItems:"center",gap:12,marginBottom:28}}><div style={{flex:1,height:4,background:C.border,borderRadius:2,overflow:"hidden"}}><div style={{width:`${(s/18)*100}%`,height:"100%",background:C.accent,borderRadius:2,transition:"width .3s"}}/></div><span style={{fontFamily:"Montserrat,sans-serif",fontSize:13,color:C.muted,fontWeight:600}}>{s+1}/18</span></div><div style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"center",gap:16,maxWidth:420,margin:"0 auto",width:"100%"}}><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:20,color:C.ink,textAlign:"center",fontStyle:"italic",margin:0}}>Що обереш?</p>{["a","b"].map(sd=>{const o=p[sd],iA=am===sd,iO=am&&am!==sd;return <button key={sd} onClick={()=>!am&&pk(sd)} style={{background:"#fff",border:`2px solid ${iA?C.accent:C.border}`,borderRadius:16,padding:"24px",cursor:am?"default":"pointer",textAlign:"center",transition:"all .25s",display:"flex",flexDirection:"column",alignItems:"center",gap:5,transform:iA?"scale(1.04)":iO?"scale(.95)":"none",opacity:iO?.3:1}}><span style={{fontSize:44}}>{o.e}</span><span style={{fontFamily:"Cormorant Garamond,serif",fontSize:20,fontWeight:600,color:C.ink}}>{o.l}</span><span style={{fontFamily:"Montserrat,sans-serif",fontSize:11,color:C.muted}}>{o.d}</span></button>})}</div></div>}
 
-function ProfileScr({arch,coins,bdgs,iq,learned,curBdg,expanded,setExpanded,go,onLearn,onBdg}){
+function ProfileScr({arch,coins,bdgs,iq,learned,curBdg,expanded,setExpanded,go,onLearn,onBdg,onShare}){
   const nextB=bdgs[curBdg];
   return <div style={{minHeight:"100vh",padding:"24px 24px 90px",maxWidth:480,margin:"0 auto"}}>
     <div style={{display:"flex",justifyContent:"space-between",marginBottom:16}}><div style={{fontFamily:"Montserrat,sans-serif",fontSize:11,color:C.muted}}>🧠 IQ: <b style={{color:C.ink}}>{iq}</b></div><Cn n={coins}/></div>
@@ -202,6 +258,7 @@ function ProfileScr({arch,coins,bdgs,iq,learned,curBdg,expanded,setExpanded,go,o
       <div style={{background:C.gold+"15",borderRadius:10,padding:"10px 14px",marginBottom:10}}><p style={{fontFamily:"Montserrat,sans-serif",fontSize:9,fontWeight:600,letterSpacing:1.5,color:C.gold,margin:"0 0 4px"}}>СУПЕРСИЛА</p><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:14,color:C.paper,margin:0}}>{arch.sup}</p></div>
       {[{i:"🍽️",l:"Вечеря",t:arch.din},{i:"🏠",l:"Ресторан",t:arch.res},{i:"🧭",l:"Спробуй",t:arch.try_},{i:"👨‍👩‍👧",l:"На кухні друзів",t:arch.fr}].map((x,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:6}}><span style={{fontSize:14}}>{x.i}</span><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:13,color:C.paper+"bb",margin:0}}><span style={{color:C.muted,fontSize:10}}>{x.l}: </span>{x.t}</p></div>)}
       <div style={{background:C.accent+"20",borderRadius:10,padding:"10px 14px",marginTop:10}}><p style={{fontFamily:"Montserrat,sans-serif",fontSize:9,fontWeight:600,letterSpacing:1.5,color:C.accent,margin:"0 0 4px"}}>🌗 ТІНЬ: {arch.sh}</p><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:13,color:C.paper+"bb",margin:0,fontStyle:"italic"}}>{arch.shd}</p></div>
+      <button onClick={onShare} style={{width:"100%",background:C.gold+"20",border:`1px solid ${C.gold}40`,borderRadius:10,padding:"12px",cursor:"pointer",marginTop:12,fontFamily:"Montserrat,sans-serif",fontSize:12,fontWeight:600,color:C.gold}}>📤 Поділитись архетипом</button>
     </div>}
     {!expanded&&<div style={{height:14}}/>}
     <button onClick={onLearn} style={{width:"100%",background:C.accent,color:"#fff",border:"none",borderRadius:12,padding:"16px",cursor:"pointer",marginBottom:6,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
@@ -264,6 +321,7 @@ export default function App(){
   const[archExp,sae]=useState(true);
   const[user,setUser]=useState(null);
   const[saving,setSaving]=useState(false);
+  const[showShare,setShowShare]=useState(false);
 
   // Auth: listen for login/logout
   useEffect(()=>{
@@ -351,10 +409,11 @@ export default function App(){
     {saving&&<div style={{position:"fixed",top:12,left:"50%",transform:"translateX(-50%)",zIndex:200,background:C.accent2,color:"#fff",borderRadius:12,padding:"4px 12px",fontFamily:"Montserrat,sans-serif",fontSize:10}}>💾</div>}
     {pop&&<Pop amt={pop.amt} txt={pop.txt} onD={()=>sp(null)}/>}
     {showRec&&<RecPop badgeIdx={curBdg} onC={()=>ssr(false)}/>}
+    {showShare&&arch&&<ShareCard arch={arch} onC={()=>setShowShare(false)}/>}
     {actB&&scr==="profile"&&<BModal b={actB} bi={actBi} curBdg={curBdg} onL={()=>{sab(null);go("learn")}} onQ={()=>{sab(null);go("iqquiz")}} onC={()=>sab(null)}/>}
     {scr==="intro"&&<Intro go={()=>{addC(100,"Ласкаво просимо!");setTimeout(()=>go("archquiz"),1900)}}/>}
-    {scr==="archquiz"&&<AQuiz onD={a=>{sa(calc(a));addC(50,"Архетип визначено!");setTimeout(()=>go("profile"),1900)}}/>}
-    {scr==="profile"&&arch&&<ProfileScr arch={arch} coins={coins} bdgs={bdgs} iq={iq} learned={learned} curBdg={curBdg} expanded={archExp} setExpanded={sae} go={go} onLearn={()=>{sae(false);go("learn")}} onBdg={(b,i)=>{sab(b);sabi(i)}}/>}
+    {scr==="archquiz"&&<AQuiz onD={a=>{sa(calc(a));addC(50,"Архетип визначено!");setTimeout(()=>{setShowShare(true);go("profile")},1900)}}/>}
+    {scr==="profile"&&arch&&<ProfileScr arch={arch} coins={coins} bdgs={bdgs} iq={iq} learned={learned} curBdg={curBdg} expanded={archExp} setExpanded={sae} go={go} onLearn={()=>{sae(false);go("learn")}} onBdg={(b,i)=>{sab(b);sabi(i)}} onShare={()=>setShowShare(true)}/>}
     {scr==="learn"&&<Learn badgeIdx={curBdg} coins={coins} setCn={sc} go={go} onD={s=>{sls(s);sl(l=>l+s.total);go("ldone")}}/>}
     {scr==="ldone"&&lSt&&<LDone stats={lSt} badgeIdx={curBdg} onRec={()=>ssr(true)} onBack={()=>{if(lSt.allDone){go("iqquiz")}else go("profile")}}/>}
     {scr==="iqquiz"&&<IQQuiz badgeIdx={curBdg} onD={score=>{const g=score*20;si(v=>v+g);sb(bs=>bs.map((b,i)=>i===curBdg?{...b,done:true,qs:score}:b));scb(c=>Math.min(c+1,BADGE_DATA.length-1));sae(false);sp({amt:0,txt:`${bdgs[curBdg]?.e} Бейдж "${bdgs[curBdg]?.n}" отримано!`});setTimeout(()=>go("profile"),1900)}}/>}
