@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { supabase } from "./supabase";
 const C={ink:"#1C1710",paper:"#F7F3EC",paper2:"#EDE7DB",accent:"#C4460A",accent2:"#2A6B4A",accent3:"#1A4A6E",gold:"#B8860B",muted:"#9A8F7E",border:"#D8CFBF"};
 
 /* ═══ REBALANCED PAIRS ═══ */
@@ -261,12 +262,93 @@ export default function App(){
   const[lSt,sls]=useState(null);
   const[showRec,ssr]=useState(false);
   const[archExp,sae]=useState(true);
+  const[user,setUser]=useState(null);
+  const[saving,setSaving]=useState(false);
+
+  // Auth: listen for login/logout
+  useEffect(()=>{
+    supabase.auth.getSession().then(({data:{session}})=>{
+      setUser(session?.user||null);
+      if(session?.user) loadProfile(session.user.id);
+    });
+    const {data:{subscription}}=supabase.auth.onAuthStateChange((_,session)=>{
+      setUser(session?.user||null);
+      if(session?.user) loadProfile(session.user.id);
+    });
+    return ()=>subscription.unsubscribe();
+  },[]);
+
+  // Load profile from Supabase
+  const loadProfile=async(uid)=>{
+    try{
+      const{data}=await supabase.from("profiles").select("*").eq("id",uid).single();
+      if(data){
+        if(data.archetype_id){
+          const a=ARCH.find(x=>x.id===data.archetype_id);
+          if(a){sa(a);ss("profile")}
+        }
+        if(data.coins)sc(data.coins);
+        if(data.iq)si(data.iq);
+        if(data.learned)sl(data.learned);
+        if(data.current_badge!=null)scb(data.current_badge);
+        if(data.badges&&Array.isArray(data.badges)&&data.badges.length>0){
+          sb(BADGE_DATA.map((b,i)=>{
+            const saved=data.badges[i];
+            return saved?{...b,done:saved.done||false,qs:saved.qs||0}:{...b,done:false,qs:0};
+          }));
+        }
+      }
+    }catch(e){console.log("load err",e)}
+  };
+
+  // Save profile to Supabase (debounced)
+  const saveProfile=useCallback(async(overrides={})=>{
+    if(!user)return;
+    setSaving(true);
+    try{
+      const payload={
+        archetype_id:arch?.id||null,
+        coins,iq,learned,current_badge:curBdg,
+        badges:bdgs.map(b=>({done:b.done,qs:b.qs})),
+        updated_at:new Date().toISOString(),
+        ...overrides
+      };
+      await supabase.from("profiles").update(payload).eq("id",user.id);
+    }catch(e){console.log("save err",e)}
+    setSaving(false);
+  },[user,arch,coins,iq,learned,curBdg,bdgs]);
+
+  // Auto-save when key state changes
+  useEffect(()=>{
+    if(user&&arch) saveProfile();
+  },[arch?.id,coins,iq,learned,curBdg,JSON.stringify(bdgs.map(b=>b.done+":"+b.qs))]);
+
+  // Google login
+  const login=async()=>{
+    await supabase.auth.signInWithOAuth({provider:"google",options:{redirectTo:window.location.origin}});
+  };
+  const logout=async()=>{
+    await supabase.auth.signOut();
+    setUser(null);
+  };
 
   const go=s=>{ss(s);sab(null);window.scrollTo(0,0)};
   const addC=(n,t)=>{sc(c=>c+n);sp({amt:n,txt:t})};
 
+  // Auth button component
+  const AuthBtn=()=>user?
+    <button onClick={logout} style={{position:"fixed",top:8,right:8,zIndex:150,background:"#fff",border:`1px solid ${C.border}`,borderRadius:20,padding:"6px 14px",cursor:"pointer",display:"flex",alignItems:"center",gap:6}}>
+      <span style={{fontFamily:"Montserrat,sans-serif",fontSize:10,color:C.muted}}>{user.email?.split("@")[0]}</span>
+      <span style={{fontSize:10,color:C.muted}}>↗</span>
+    </button>:
+    <button onClick={login} style={{position:"fixed",top:8,right:8,zIndex:150,background:C.ink,color:C.paper,border:"none",borderRadius:20,padding:"6px 14px",cursor:"pointer",fontFamily:"Montserrat,sans-serif",fontSize:11}}>
+      Увійти
+    </button>;
+
   return <div style={{minHeight:"100vh",background:C.paper}}>
     <style>{`@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Montserrat:wght@400;500;600;700&display=swap');*{box-sizing:border-box;margin:0;padding:0}body{background:${C.paper}}button:active{transform:scale(.97)!important}`}</style>
+    <AuthBtn/>
+    {saving&&<div style={{position:"fixed",top:12,left:"50%",transform:"translateX(-50%)",zIndex:200,background:C.accent2,color:"#fff",borderRadius:12,padding:"4px 12px",fontFamily:"Montserrat,sans-serif",fontSize:10}}>💾</div>}
     {pop&&<Pop amt={pop.amt} txt={pop.txt} onD={()=>sp(null)}/>}
     {showRec&&<RecPop badgeIdx={curBdg} onC={()=>ssr(false)}/>}
     {actB&&scr==="profile"&&<BModal b={actB} bi={actBi} curBdg={curBdg} onL={()=>{sab(null);go("learn")}} onQ={()=>{sab(null);go("iqquiz")}} onC={()=>sab(null)}/>}
