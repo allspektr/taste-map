@@ -5,29 +5,68 @@ const C={ink:"#1C1710",paper:"#F7F3EC",paper2:"#EDE7DB",accent:"#C4460A",accent2
 /* ═══ ANALYTICS ═══ */
 const track=async(event,data={})=>{try{const{data:{session}}=await supabase.auth.getSession();await supabase.from("events").insert({event,data,user_id:session?.user?.id||null})}catch(e){}};
 
-/* ═══ REBALANCED PAIRS ═══ */
-const PAIRS=[
-{a:{e:"🥩",l:"Стейк рібай",d:"Жар, скоринка"},b:{e:"🐟",l:"Севіче",d:"Сире, лайм"},w:{a:{heat:30,classic:15},b:{fresh:30,novel:15}}},
-{a:{e:"🍖",l:"BBQ ребра",d:"Дим, 6 годин"},b:{e:"🍣",l:"Суші",d:"Точність"},w:{a:{heat:25,home:15},b:{minimal:25,fresh:10,resto:15}}},
-{a:{e:"🍕",l:"Піца",d:"Гаряча"},b:{e:"🦪",l:"Устриці",d:"Сирі"},w:{a:{classic:15,home:15},b:{fresh:20,novel:15,resto:20}}},
-{a:{e:"🍝",l:"Карбонара",d:"Кремова"},b:{e:"🍜",l:"Том-ям",d:"Гостре"},w:{a:{classic:25,home:10},b:{novel:25,fresh:10}}},
-{a:{e:"🐟",l:"Севіче",d:"Лайм"},b:{e:"🍝",l:"Лазанья",d:"Комфорт"},w:{a:{novel:20,fresh:20,minimal:10},b:{classic:25,complex:15,home:15}}},
-{a:{e:"🧀",l:"Пармезан",d:"Умамі"},b:{e:"🥬",l:"Кімчі",d:"Ферментоване"},w:{a:{classic:20,minimal:10},b:{novel:25,fresh:10}}},
-{a:{e:"🍫",l:"Гіркий шоколад",d:"Один смак"},b:{e:"🍮",l:"Крем-брюле",d:"Техніка"},w:{a:{minimal:25},b:{complex:20,resto:15}}},
-{a:{e:"🍣",l:"Суші",d:"Рис+риба"},b:{e:"🍝",l:"Карбонара",d:"Пекоріно"},w:{a:{minimal:20,fresh:15,resto:15},b:{complex:15,classic:10,home:10}}},
-{a:{e:"🍔",l:"Чізбургер",d:"Один смак"},b:{e:"🥗",l:"Боул",d:"Баланс"},w:{a:{minimal:15,home:15},b:{complex:15,fresh:10,novel:10}}},
-{a:{e:"🍢",l:"Шашлик",d:"Мангал"},b:{e:"🥩",l:"Філе-міньйон",d:"Демі-глас"},w:{a:{home:30,heat:20},b:{resto:30,complex:10}}},
-{a:{e:"🍲",l:"Борщ",d:"Бабусин"},b:{e:"🧅",l:"Цибулевий суп",d:"French onion"},w:{a:{home:30,classic:15},b:{resto:25,classic:10}}},
-{a:{e:"🍚",l:"Плов",d:"Казан"},b:{e:"🍚",l:"Різото",d:"Пармезан"},w:{a:{home:25,classic:15},b:{resto:25,complex:10}}},
-{a:{e:"🥟",l:"Вареники",d:"Сметана"},b:{e:"🥟",l:"Равіолі",d:"Трюфель"},w:{a:{home:30,classic:10},b:{resto:25,novel:10}}},
-{a:{e:"🥘",l:"Рагу",d:"Домашнє"},b:{e:"🔪",l:"Тартар",d:"Мінімалізм"},w:{a:{home:20,complex:15},b:{resto:20,minimal:20,fresh:15}}},
-{a:{e:"☕",l:"Еспресо",d:"Чистий"},b:{e:"🥞",l:"Панкейки",d:"Ритуал"},w:{a:{minimal:20,resto:15},b:{home:20,classic:15}}},
-{a:{e:"🌮",l:"Тако",d:"Вуличні"},b:{e:"🫕",l:"Фондю",d:"Повільне"},w:{a:{novel:15,fresh:10,home:10},b:{classic:15,complex:10,home:15}}},
-{a:{e:"🥑",l:"Тост авокадо",d:"Сучасне"},b:{e:"🥘",l:"Гуляш",d:"Традиційне"},w:{a:{fresh:20,novel:15,minimal:10},b:{classic:20,complex:10,home:15}}},
-{a:{e:"🍰",l:"Тірамісу",d:"Шари"},b:{e:"🍧",l:"Сорбет",d:"Яскравий"},w:{a:{complex:20,classic:15},b:{minimal:20,novel:15,fresh:10}}}
+/* ═══ 24 ORACLE QUESTIONS — 6 per axis ═══ */
+const ALL_PAIRS=[
+// S/Cr — Source vs Craft
+{q:"Бачиш ідеальний продукт. Твоє его дозволить йому просто бути?",a:{l:"Лише сіль",v:"S"},b:{l:"Додам магії",v:"Cr"},axis:"S/Cr"},
+{q:"Хто ти сьогодні у цьому гастро-безумстві?",a:{l:"Мудрий пурист",v:"S"},b:{l:"Шалений алхімік",v:"Cr"},axis:"S/Cr"},
+{q:"Ідеальний вечір. На столі одна страва. Вона...",a:{l:"Проста",v:"S"},b:{l:"Складна симфонія",v:"Cr"},axis:"S/Cr"},
+{q:"Тобі дарують трюфель. Твоя перша думка?",a:{l:"Настругати",v:"S"},b:{l:"Зробити соус",v:"Cr"},axis:"S/Cr"},
+{q:"Перед тобою стейк за $100. Твоя релігія дозволяє маринад?",a:{l:"Лише сіль",v:"S"},b:{l:"Додам нюансів",v:"Cr"},axis:"S/Cr"},
+{q:"Ти знайшов ідеальний томат. Твій наступний крок?",a:{l:"Просто вкушу",v:"S"},b:{l:"Зроблю гаспачо",v:"Cr"},axis:"S/Cr"},
+// R/Sp — Ritual vs Spontaneity
+{q:"Дзвінок у двері за 20 хвилин. Твій внутрішній стан?",a:{l:"Сталевий план",v:"R"},b:{l:"Повний джаз",v:"Sp"},axis:"R/Sp"},
+{q:"Ранок неділі. Твоя кухня сьогодні — це...",a:{l:"Ритуал",v:"R"},b:{l:"Веселий хаос",v:"Sp"},axis:"R/Sp"},
+{q:"В рецепті написано «за смаком». Твоя реакція?",a:{l:"Дратує. Дай грами",v:"R"},b:{l:"Нарешті! Свобода",v:"Sp"},axis:"R/Sp"},
+{q:"Готуєш для 10 людей. Твій підхід?",a:{l:"Таймінг/План",v:"R"},b:{l:"Буде що буде",v:"Sp"},axis:"R/Sp"},
+{q:"Новий кухонний гаджет у руках. Твої дії?",a:{l:"Читаю мануал",v:"R"},b:{l:"Тисну кнопки",v:"Sp"},axis:"R/Sp"},
+{q:"Ти в супермаркеті. Твій шлях поміж рядами — це...",a:{l:"Чіткий список",v:"R"},b:{l:"Куди занесе",v:"Sp"},axis:"R/Sp"},
+// P/A — Power vs Aesthetics
+{q:"День — катастрофа. Чим будеш лікувати душу?",a:{l:"Ситне тепло",v:"P"},b:{l:"Витончена краса",v:"A"},axis:"P/A"},
+{q:"Створюєш шедевр. Твоя гордість тримається на...",a:{l:"Потужному смаку",v:"P"},b:{l:"Бездоганному кадрі",v:"A"},axis:"P/A"},
+{q:"Вибір ресторану. Що вирішує?",a:{l:"Порції та ситість",v:"P"},b:{l:"Атмосфера/Подача",v:"A"},axis:"P/A"},
+{q:"Запрошення на ТБ-шоу. Твоя стратегія?",a:{l:"Зроблю найсмачніше",v:"P"},b:{l:"Зроблю найкрасивіше",v:"A"},axis:"P/A"},
+{q:"Викладаєш страву на тарілку. Внутрішній голос каже:",a:{l:"«Аби гаряче»",v:"P"},b:{l:"«Ще один штрих»",v:"A"},axis:"P/A"},
+{q:"Найкращий комплімент твоєму таланту:",a:{l:"«Я наївся!»",v:"P"},b:{l:"«Це шедевр!»",v:"A"},axis:"P/A"},
+// C/E — Comfort vs Expression
+{q:"У меню назва, схожа на закляття. Твоя реакція?",a:{l:"Дайте знайоме",v:"C"},b:{l:"Везіть невідомість",v:"E"},axis:"C/E"},
+{q:"Тобі кажуть: «Це занадто дивно!». Твій мозок видає:",a:{l:"Треба виправити",v:"C"},b:{l:"Це комплімент!",v:"E"},axis:"C/E"},
+{q:"Відпустка. Як обираєш місце для обіду?",a:{l:"Де радять місцеві",v:"C"},b:{l:"Де ніхто не був",v:"E"},axis:"C/E"},
+{q:"Готуєш улюблену страву. Ти...",a:{l:"Не змінюю роками",v:"C"},b:{l:"Постійно експериментую",v:"E"},axis:"C/E"},
+{q:"Відкриваєш меню на 20 сторінок. Палець шукає:",a:{l:"Знайому гавань",v:"C"},b:{l:"Квиток у пригоду",v:"E"},axis:"C/E"},
+{q:"Шеф каже: «Я приготую імпровізацію». Твій стан?",a:{l:"Розкажи спершу",v:"C"},b:{l:"Я в твоїх руках",v:"E"},axis:"C/E"},
 ];
 
-const ARCH=[{id:"heat-classic-minimal-resto",n:"Майстер вогню",e:"🔥",d:"Ти і вогонь — одна мова. 54°C всередині, 300 зовні, 7 хвилин відпочинку.",sup:"Перетворити один продукт на шедевр через точну техніку",din:"Стейк medium-rare, флер-де-сель, каберне, тиша",res:"Стейкхаус з відкритою кухнею",try_:"Су-від 54°C з фінішем на чавуні",fr:"Стоїш біля грилю з термометром і нікому не даєш перевертати",sh:"Вільний дух 🦋",shd:"Готуй без рецепту і термометра."},{id:"heat-classic-minimal-home",n:"Хранитель полум'я",e:"🏕️",d:"Вогонь для тебе — ритуал. Запах вугілля, шкварчання м'яса, друзі з бокалами.",sup:"Зробити просту їжу на вогні такою що зігріває і тіло, і душу",din:"Шашлик під відкритим небом, теплий вечір, 6 найближчих друзів",res:"Гастропаб з каміном",try_:"Повільне BBQ — 12 годин медитації біля вогню",fr:"Де ти — там пахне димом і щастям",sh:"Тихий естет 🌸",shd:"Карпачо зі свого улюбленого м'яса — знайомий продукт без вогню."},{id:"heat-classic-complex-resto",n:"Архітектор смаку",e:"🏛️",d:"Страва як проєкт: фундамент, конструкція, фініш. Біф Велінгтон — інженерне рішення.",sup:"Складна багатокомпонентна страва де все працює як годинник",din:"Дегустаційне меню з 5 перемін",res:"Fine dining з сетом від шефа",try_:"Консоме — 8 годин заради прозорого бульйону",fr:"Спредшіт з таймінгами, готуєш за 2 дні",sh:"Поет смаку ✨",shd:"Забудь план. Приготуй на настрій."},{id:"heat-classic-complex-home",n:"Щедра душа",e:"🤲",d:"Стіл завжди повний. Ти готуєш щоб бачити обличчя після першого шматка.",sup:"Нагодувати 12 людей і кожен відчує себе найважливішим",din:"Великий стіл, 7 страв, бабусина скатертина",res:"Тратторія де порції неможливо доїсти",try_:"Грузинський стіл — хінкалі, хачапурі",fr:"Три контейнери: 'трохи наготував'",sh:"Тихий перфекціоніст 🎯",shd:"Одна страва тільки для себе."},{id:"heat-novel-minimal-resto",n:"Вогняний новатор",e:"⚡",d:"Поважаєш вогонь але не кордони. Стейк з юзу. Гриль осьмінога.",sup:"Зробити щось нове що бездоганно працює",din:"Omakase де шеф імпровізує",res:"Авторський з меню що змінюється щотижня",try_:"Сичуанський хот-пот",fr:"Трюфельна олія до бургерів — 'чому раніше так не робили?'",sh:"Домашній філософ 🏡",shd:"Бабусин рецепт без покращень."},{id:"heat-novel-minimal-home",n:"Бунтар смаку",e:"🏴‍☠️",d:"Ананас на піці — якщо смачно. Найкраща їжа — з нічного ринку.",sup:"Знайти їжу там де ніхто не шукав",din:"Нічний ринок — руками, стоячи",res:"Без вивіски, знають місцеві",try_:"Шоколад з чилі і сіллю",fr:"Піца + мед + чилі → всі просять ще",sh:"Тихий перфекціоніст 🎯",shd:"Один рецепт точно за правилами."},{id:"heat-novel-complex-resto",n:"Шеф-алхімік",e:"⚗️",d:"Не готуєш — трансформуєш. Знаєш ЧОМУ шоколад+місо працює.",sup:"Страва яку ніхто не їв і всім зайшло",din:"Дегустація 12 перемін з вино-парінгом",res:"Noma, Gaggan — кухня як мистецтво",try_:"Домашнє місо або кімчі",fr:"Пояснюєш хімію і всі кажуть 'ааа!'",sh:"Ніжний хранитель 🕊️",shd:"Бульйон. Просто бульйон."},{id:"heat-novel-complex-home",n:"Вогняний мандрівник",e:"🌍",d:"Кожна кухня — нова країна. Спеції > одяг.",sup:"Замовити те що ніхто не наважився",din:"Стріт-фуд тур по 5 країнах",res:"Новий кожного тижня, інша кухня",try_:"Ефіопську інджеру або натто",fr:"Привіз харіссу з Тунісу і готує з нею все",sh:"Майстер балансу ⚖️",shd:"Одна знайома страва з ідеальним балансом."},{id:"fresh-classic-minimal-resto",n:"Тихий перфекціоніст",e:"🎯",d:"Один ідеальний рис. Одне ідеальне яйце. Простота — найскладніше.",sup:"Зварити рис так що японський шеф кивне",din:"Суші з трьох шматочків, але кожен ідеальний",res:"Omakase на 8 місць",try_:"Японську чайну церемонію",fr:"Пашот 20 хвилин — всі замовкли від жовтка",sh:"Бунтар смаку 🏴‍☠️",shd:"Додай 'зайвий' інгредієнт."},{id:"fresh-classic-minimal-home",n:"Ніжний хранитель",e:"🕊️",d:"Їжа як турбота. Бульйон коли хворіє, какао в дощ.",sup:"Людина відчує себе вдома за першим шматком",din:"Щось тепле, маленький стіл, кохана людина",res:"Кафе де знають по імені",try_:"Бульйон 12 годин — це ти в рідкій формі",fr:"Залишив сніданок з записочкою",sh:"Шеф-алхімік ⚗️",shd:"Місо в бульйон. Кориця в какао."},{id:"fresh-classic-complex-resto",n:"Майстер балансу",e:"⚖️",d:"Кислота балансує жир, сіль підсилює солодке. Всі елементи співають.",sup:"Страва де неможливо визначити що робить її гарною",din:"Французьке бістро з ідеальним вінегретом",res:"Місце де все 'просто смачно'",try_:"Вінегрет з нуля — пропорції як мікро-баланс",fr:"Соус який всі хочуть повторити",sh:"Вогняний мандрівник 🌍",shd:"Сичуанська їжа. Хаос як порядок."},{id:"fresh-classic-complex-home",n:"Домашній філософ",e:"🏡",d:"Руки бабусі що ліпили вареники. Запах борщу — 'ти вдома'.",sup:"Свято з нічого, просто накривши стіл",din:"Сімейний обід, три покоління",res:"Бабусина кухня будь-якої культури",try_:"Запиши рецепти родини",fr:"Історія до кожної страви",sh:"Вогняний новатор ⚡",shd:"Традиційна страва з сучасним твістом."},{id:"fresh-novel-minimal-resto",n:"Тихий естет",e:"🌸",d:"Три інгредієнти, один акцент. Менше = більше.",sup:"Три інгредієнти як полотно в галереї",din:"Кайсекі — 8 перемін, кожна як хайку",res:"Скандинавський мінімалізм, білий посуд",try_:"Карпачо або тартар",fr:"Фотографуєш їжу бо вона красива",sh:"Хранитель полум'я 🏕️",shd:"Обсмаж на максимальному вогні."},{id:"fresh-novel-minimal-home",n:"Поет смаку",e:"✨",d:"Їжа як музика. 'Цьому не вистачає кислоти' — ти завжди правий.",sup:"Описати смак так що інші хочуть спробувати",din:"Несподіване, на терасі, натуральне вино",res:"Шеф-бар на 6 місць",try_:"Натуральне вино — жива пляшка",fr:"'Цей сир пахне осіннім лісом' — всі кивають",sh:"Архітектор смаку 🏛️",shd:"Порахуй пропорції. Зваж все."},{id:"fresh-novel-complex-resto",n:"Дослідник гармоній",e:"🔬",d:"Шоколад+місо? Логічно — спільні сполуки Мейяра.",sup:"Нова комбінація яка працює з першого разу",din:"Дегустація з 'нелогічними' парінгами",res:"Авторський де меню змінюється щодня",try_:"Food pairing на основі ароматичних сполук",fr:"Арахісова паста + місо + білий шоколад — wow",sh:"Щедра душа 🤲",shd:"Великий стіл, прості рецепти."},{id:"fresh-novel-complex-home",n:"Вільний дух",e:"🦋",d:"Немає улюбленої страви — є настрій. Рецепти не потрібні.",sup:"Шедевр з холодильника за 20 хвилин",din:"'Піди туди не знаю куди'",res:"Кожного разу новий, випадковий",try_:"Тиждень без рецептів",fr:"Три яйця, рис, лимон → шедевр",sh:"Майстер вогню 🔥",shd:"Один продукт, одна техніка, фокус."}];
+// Pick 4 random questions per axis = 16 total
+const pickQuestions=()=>{
+  const byAxis={};
+  ALL_PAIRS.forEach(p=>{if(!byAxis[p.axis])byAxis[p.axis]=[];byAxis[p.axis].push(p)});
+  const result=[];
+  Object.values(byAxis).forEach(arr=>{
+    const shuffled=[...arr].sort(()=>Math.random()-0.5);
+    result.push(...shuffled.slice(0,4));
+  });
+  return result.sort(()=>Math.random()-0.5);
+};
+
+const ARCH=[
+{id:"S-R-P-C",n:"Моноліт",e:"🗿",d:"Ти — людина-фундамент. У світі, де все постійно змінюється, ти залишаєшся вірним стандартам, які перевірені часом. Твій стіл — це зона абсолютної впевненості.",sup:"Стабільність. Ти робиш прості речі так, що вони стають еталоном.",punkt:"Ти швидше залишишся голодним, ніж з'їси щось сумнівної якості.",pravda:"У тебе є «той самий» рецепт, який ти не змінював роками, бо краще вже неможливо.",gniv:"Люди, які кажуть: «Та яка різниця, воно все одно перемішається».",sh:"Авангардист 🎭",shd:"Спробуй готувати без рецепта. Хаос теж може бути смачним."},
+{id:"S-R-P-E",n:"Гранд-Майстер",e:"⚔️",d:"Ти — кулінарний стратег. Твій підхід до життя нагадує шлях майстра бойових мистецтв: дисципліна, точність і повний контроль.",sup:"Залізна впевненість. Ти точно знаєш, що робиш, навіть якщо навколо хаос.",punkt:"Ти швидше викинеш страву, ніж подаси її недосконалою.",pravda:"Ти любиш порядок на кухні більше, ніж саму їжу. Але результат завжди шокує.",gniv:"Коли хтось намагається «допомогти» і псує твій ідеально вибудуваний процес.",sh:"Душа Застілля 🎪",shd:"Навмисно впусти хаос на кухню. Запроси 10 людей готувати разом."},
+{id:"S-R-A-C",n:"Святилище",e:"🕯️",d:"Ти — естет-миротворець. Для тебе важливий не просто смак, а внутрішня гармонія моменту. Ти володієш рідкісним даром помічати красу в тиші та простоті.",sup:"Гармонія. Твій сніданок виглядає так, ніби його малювали ангели.",punkt:"Якщо чашка не пасує до тарілки, смак кави для тебе псується на 50%.",pravda:"Ти можеш витратити 10 хвилин на викладання одного листка салату, і вважаєш це виправданим.",gniv:"Хаос на столі та пластиковий посуд.",sh:"Руйнівник Кордонів 💥",shd:"Поїж руками. З паперової тарілки. На вулиці. Спробуй цінувати суть вище за оболонку."},
+{id:"S-R-A-E",n:"Куратор",e:"🔭",d:"Ти — дослідник сенсів. Ти не просто споживаєш досвід, ти його колекціонуєш. Кожна вечеря для тебе — це інтелектуальна подорож.",sup:"Вишуканий смак. Ти знаходиш краще там, де інші бачать звичне.",punkt:"Тобі важливо знати історію продукту. Ти не просто їси, ти вивчаєш контекст.",pravda:"Ти — та сама людина, яка пояснює гостям 15 хвилин, чому це вино ідеальне, поки вони просто хочуть пити.",gniv:"Посередність та відсутність ідеї за стравою.",sh:"Стихія 🌪️",shd:"Купи перше що побачиш на ринку. Не питай звідки. Не гугли."},
+{id:"S-Sp-P-C",n:"Стихія",e:"🌪️",d:"Ти — жива енергія природи. Твоя гостинність не має кордонів, бо вона йде від серця, а не від правил. Ти готуєш «на повну потужність».",sup:"Вітальна сила. Твоя їжа повертає людей до життя одним запахом.",punkt:"Ти ненавидиш маленькі порції. Їжа має бути щедрою, або її не має бути взагалі.",pravda:"Твій холодильник завжди повний «на всяк випадок», і цей випадок стається щовечора.",gniv:"Дієтичні замінники та спроби зробити їжу «знежиреною».",sh:"Святилище 🕯️",shd:"Подай одну страву на великому білому посуді. Знайди красу в тонких відтінках."},
+{id:"S-Sp-P-E",n:"Пророк Вогню",e:"🔥",d:"Ти — приборкувач моменту. Твій головний інструмент — інтуїція. Ти відчуваєш межу, коли продукт стає шедевром, не користуючись таймерами.",sup:"Інстинкт. Ти бачиш душу продукту і знаєш, як дістати її одним рухом.",punkt:"Рецепти для тебе — лише чиїсь фантазії, які ти з радістю ігноруєш.",pravda:"Ти не підпустиш до гриля нікого, і це єдиний спосіб врятувати цей вечір.",gniv:"Коли ідеальний продукт псують зайвою обробкою.",sh:"Ткач Гармонії 🎼",shd:"Зроби страву з 7 ідеально збалансованих компонентів. За рецептом. Точно."},
+{id:"S-Sp-A-C",n:"Поет Повсякденності",e:"🌿",d:"Ти — романтик моменту. Ти бачиш поезію в розбитому яйці або сонячному зайчику на тарілці. Твоя кухня — це майстерня легкості.",sup:"Легкість. Ти робиш кожен день особливим, просто змінивши серветки.",punkt:"Тобі важливо, як падає світло на тарілку під час обіду.",pravda:"Ти купуєш продукти за те, як вони «дивляться на тебе» з полиці магазину.",gniv:"Грубість та їжа «на бігу» з паперових пакетів.",sh:"Алхімік Світла ✨",shd:"Зроби складний соус. 8 інгредієнтів. 2 години. Точна температура."},
+{id:"S-Sp-A-E",n:"Візіонер",e:"🦅",d:"Ти — мисливець за спалахами. Ти живеш у майбутньому, постійно шукаючи поєднання, про які інші ще навіть не думали.",sup:"Погляд у майбутнє. Ти поєднуєш те, що інші ще бояться уявити.",punkt:"Ти можеш забути поїсти, поки створюєш ідеальний кадр своєї страви.",pravda:"Твої експерименти іноді неможливо повторити, бо ти сам не знаєш, як це вийшло.",gniv:"Фраза «ми завжди так робили».",sh:"Моноліт 🗿",shd:"Зроби один рецепт 10 разів поспіль. Ідеально однаково. Знайди досконалість у повторенні."},
+{id:"Cr-R-P-C",n:"Архітектор Роду",e:"🏰",d:"Ти — хранитель традицій. Ти будуєш життя як міцний замок — з надійним плануванням та повагою до коріння. Твій стіл — це місце збору клану.",sup:"Структура. Ти перетворюєш хаос на ідеально змащений механізм застілля.",punkt:"У тебе є Excel-таблиця для закупок, і вона прекрасна.",pravda:"Ти — та сама людина, яка готує 15 буханок хліба одночасно, бо «менше — це не серйозно».",gniv:"Коли хтось змінює твій порядок на полицях зі спеціями.",sh:"Візіонер 🦅",shd:"Приготуй щось без плану. Перший продукт який побачиш у холодильнику."},
+{id:"Cr-R-P-E",n:"Алхімік Світла",e:"✨",d:"Ти — майстер трансформацій. Для тебе приготування їжі — це наука перетворення простого на складне і благородне. Ти віриш у техніку та терпіння.",sup:"Трансформація. Твої соуси — це таємні закляття, які змінюють реальність.",punkt:"Ти віриш у техніку та науку. Температура масла важливіша за настрій.",pravda:"Ти витрачаєш години на те, що люди з'їдають за хвилину, і це твоя форма медитації.",gniv:"Поверхневість та кулінарне невігластво.",sh:"Поет Повсякденності 🌿",shd:"Зроби щось за 5 хвилин. З трьох інгредієнтів. Без науки."},
+{id:"Cr-R-A-C",n:"Ткач Гармонії",e:"🎼",d:"Ти — балансувальник емоцій. Ти володієш вродженим чуттям міри. У твоєму житті та на твоїй тарілці немає нічого зайвого, але всього достатньо.",sup:"Рівновага. У твоїх стравах нічого не забагато і нічого не замало.",punkt:"Ти шукаєш ідеальне поєднання смаку, кольору та текстури.",pravda:"Ти — миротворець. Твоя їжа здатна припинити будь-яку сварку за столом.",gniv:"Різкі, незбалансовані смаки та крик на кухні.",sh:"Пророк Вогню 🔥",shd:"Зроби щось екстремально гостре. Або екстремально димне. Знайди характер у нерівності."},
+{id:"Cr-R-A-E",n:"Режисер Смаку",e:"🎬",d:"Ти — постановник вражень. Ти не просто запрошуєш людей на вечерю, ти створюєш для них новий світ. Ти концептуаліст.",sup:"Концепція. Ти не годуєш людей, ти занурюєш їх в інший світ.",punkt:"Сценарій вечора важливіший за саму їжу.",pravda:"Ти знаєш, який трек має грати, коли подають десерт.",gniv:"Коли гості приходять невчасно і руйнують таймінг подачі.",sh:"Стихія 🌪️",shd:"Нагодуй 10 людей з того що є в холодильнику. Без сценарію. Без музики."},
+{id:"Cr-Sp-P-C",n:"Душа Застілля",e:"🎪",d:"Ти — джерело щедрості. Твоє життя — це відкритий дім. Ти імпровізуєш на ходу, перетворюючи звичайні інгредієнти на бенкет для друзів.",sup:"Масштаб. Ти вмієш нагодувати натовп так, ніби це найрідніші люди.",punkt:"Ти ніколи не знаєш, скільки людей буде за столом, але їжі завжди вистачає.",pravda:"Ти кажеш «це просто перекус», виставляючи 12 гарячих страв.",gniv:"Маленькі порції та егоїзм за столом.",sh:"Куратор 🔭",shd:"Одна страва. Тільки для себе. З повним фокусом. Без аудиторії."},
+{id:"Cr-Sp-P-E",n:"Руйнівник Кордонів",e:"💥",d:"Ти — бунтар-першовідкривач. Ти йдеш проти правил просто тому, що можеш створити кращі. Твоє життя — це рок-н-рол на кухні.",sup:"Сміливість. Ти йдеш туди, де інші бачать лише провал, і перемагаєш.",punkt:"Ти обожнюєш екстремальні смаки та незвичні поєднання.",pravda:"Ти — кулінарний бунтар. Твої методи жахають класиків, але вони стоять у черзі за твоїми стравами.",gniv:"Нудні правила та «традиційні» обмеження.",sh:"Святилище 🕯️",shd:"Зроби щось класичне. За рецептом. Без імпровізацій. Визнай цінність створеного до тебе."},
+{id:"Cr-Sp-A-C",n:"Майстер Балансу",e:"🎨",d:"Ти — геній адаптивності. Ти вмієш створювати шедеври «з нічого», не втрачаючи при цьому елегантності. Твій підхід — це «лінива висока кухня».",sup:"Адаптивність. Ти створюєш шедевр із того, що підморгнуло тобі в холодильнику.",punkt:"Тобі важливо, щоб процес був легким і приємним для всіх.",pravda:"Ти — майстер «лінивої» високої кухні. Все виглядає дорого, але зроблено за 15 хвилин.",gniv:"Зайва складність там, де можна зробити просто і гарно.",sh:"Архітектор Роду 🏰",shd:"Склади чіткий план вечері на 3 страви. Таймлайн. Список. Відчуй структуру."},
+{id:"Cr-Sp-A-E",n:"Авангардист",e:"🎭",d:"Ти — філософ-провокатор. Ти використовуєш їжу як спосіб комунікації. Твоя тарілка — це заява, виклик системі та застарілим поглядам.",sup:"Шок і захват. Ти змінюєш уявлення людей про те, що таке їжа.",punkt:"Тобі нудно готувати те саме двічі.",pravda:"Ти — кулінарний філософ. Твої страви частіше обговорюють, ніж просто їдять.",gniv:"Консерватизм та страх перед новим.",sh:"Моноліт 🗿",shd:"Один рецепт. 10 разів. Знайди досконалість у повторенні."}
+];
 
 /* ═══ 5 BADGES WITH FULL CONTENT ═══ */
 const BADGE_DATA=[
@@ -181,7 +220,29 @@ const BEEF_GROUPS=[
 ];
 
 /* ═══ HELPERS ═══ */
-function calc(a){const s={heat:0,fresh:0,classic:0,novel:0,minimal:0,complex:0,resto:0,home:0};a.forEach((c,i)=>{const w=PAIRS[i]?.w[c];if(w)Object.entries(w).forEach(([k,v])=>{s[k]=(s[k]||0)+v})});return ARCH.find(x=>x.id===[s.heat>=s.fresh?"heat":"fresh",s.classic>=s.novel?"classic":"novel",s.minimal>=s.complex?"minimal":"complex",s.resto>=s.home?"resto":"home"].join("-"))||ARCH[0]}
+function calc(answers,questions){
+  const s={S:0,Cr:0,R:0,Sp:0,P:0,A:0,C:0,E:0};
+  answers.forEach((choice,i)=>{
+    const q=questions[i];if(!q)return;
+    const v=choice==="a"?q.a.v:q.b.v;
+    s[v]=(s[v]||0)+1;
+  });
+  const id=[
+    s.S>=s.Cr?"S":"Cr",
+    s.R>=s.Sp?"R":"Sp",
+    s.P>=s.A?"P":"A",
+    s.C>=s.E?"C":"E"
+  ].join("-");
+  const arch=ARCH.find(x=>x.id===id)||ARCH[0];
+  // Calculate spectrum percentages for visualization
+  const spectrum={
+    sCr:{left:s.S,right:s.Cr,total:s.S+s.Cr,leftLabel:"Source",rightLabel:"Craft"},
+    rSp:{left:s.R,right:s.Sp,total:s.R+s.Sp,leftLabel:"Ritual",rightLabel:"Spontaneity"},
+    pA:{left:s.P,right:s.A,total:s.P+s.A,leftLabel:"Power",rightLabel:"Aesthetics"},
+    cE:{left:s.C,right:s.E,total:s.C+s.E,leftLabel:"Comfort",rightLabel:"Expression"}
+  };
+  return{...arch,spectrum};
+}
 const Cn=({n})=><div style={{background:C.gold+"18",borderRadius:20,padding:"5px 12px",display:"inline-flex",alignItems:"center",gap:5}}><span style={{fontSize:13}}>🪙</span><span style={{fontFamily:"Montserrat,sans-serif",fontSize:12,fontWeight:700,color:C.gold}}>{n}</span></div>;
 function Pop({amt,txt,onD}){const[v,sv]=useState(true);useEffect(()=>{setTimeout(()=>{sv(false);setTimeout(onD,300)},1800)},[]);return <div style={{position:"fixed",inset:0,display:"flex",alignItems:"center",justifyContent:"center",zIndex:999,background:"rgba(0,0,0,.3)",opacity:v?1:0,transition:"opacity .3s",pointerEvents:"none"}}><div style={{background:"#fff",borderRadius:20,padding:"28px 36px",textAlign:"center",transform:v?"scale(1)":"scale(.8)",transition:"transform .3s"}}><div style={{fontSize:44,marginBottom:6}}>{amt>0?"🪙":"🏆"}</div><div style={{fontFamily:"Cormorant Garamond,serif",fontSize:amt>0?28:20,fontWeight:600,color:amt>0?C.gold:C.accent2,marginTop:6}}>{amt>0?`+${amt}`:txt}</div>{amt>0&&<div style={{fontFamily:"Montserrat,sans-serif",fontSize:12,color:C.muted,marginTop:4}}>{txt}</div>}</div></div>}
 function BNav({a,go}){return <div style={{position:"fixed",bottom:0,left:0,right:0,background:"#fff",borderTop:`1px solid ${C.border}`,display:"flex",zIndex:100,paddingBottom:"env(safe-area-inset-bottom)"}}>{[{id:"learn",e:"📚",l:"Навчання"},{id:"profile",e:"🧬",l:"Профіль"},{id:"atlas",e:"🗺️",l:"Атлас"}].map(t=><button key={t.id} onClick={()=>go(t.id)} style={{flex:1,border:"none",background:"transparent",padding:"10px 0 8px",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:2}}><span style={{fontSize:20}}>{t.e}</span><span style={{fontFamily:"Montserrat,sans-serif",fontSize:9,fontWeight:a===t.id?700:400,color:a===t.id?C.accent:C.muted}}>{t.l}</span></button>)}</div>}
@@ -261,7 +322,44 @@ function AuthPrompt({onLogin,onSkip}){
 /* ═══ SCREENS ═══ */
 function Intro({go}){useEffect(()=>{track("page_view",{page:"intro"})},[]);return <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"100vh",padding:"40px 24px",textAlign:"center"}}><div style={{fontSize:72,marginBottom:24}}>🧬</div><h1 style={{fontFamily:"Cormorant Garamond,serif",fontSize:42,fontWeight:300,color:C.ink,margin:"0 0 8px",letterSpacing:4}}>СМАКОВА КАРТА</h1><div style={{width:40,height:2,background:C.accent,margin:"0 auto 20px"}}/><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:20,color:C.muted,fontStyle:"italic",margin:"0 0 40px",maxWidth:380,lineHeight:1.5}}>Обирай їжу — дізнайся хто ти</p><button onClick={()=>{track("quiz_start");go()}} style={{background:C.ink,color:C.paper,border:"none",borderRadius:10,padding:"16px 48px",fontFamily:"Cormorant Garamond,serif",fontSize:20,letterSpacing:2,cursor:"pointer"}}>ПОЧАТИ</button></div>}
 
-function AQuiz({onD}){const[s,ss]=useState(0);const[a,sa]=useState([]);const[am,sam]=useState(null);const p=PAIRS[s];const pk=sd=>{sam(sd);track("archquiz_answer",{q:s+1,pair:`${p.a.l} vs ${p.b.l}`,choice:sd==="a"?p.a.l:p.b.l});setTimeout(()=>{const n=[...a,sd];if(n.length>=18){track("archquiz_complete");onD(n)}else{sa(n);ss(s+1);sam(null)}},280)};return <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",padding:"24px"}}><div style={{display:"flex",alignItems:"center",gap:12,marginBottom:28}}><div style={{flex:1,height:4,background:C.border,borderRadius:2,overflow:"hidden"}}><div style={{width:`${(s/18)*100}%`,height:"100%",background:C.accent,borderRadius:2,transition:"width .3s"}}/></div><span style={{fontFamily:"Montserrat,sans-serif",fontSize:13,color:C.muted,fontWeight:600}}>{s+1}/18</span></div><div style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"center",gap:16,maxWidth:420,margin:"0 auto",width:"100%"}}><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:20,color:C.ink,textAlign:"center",fontStyle:"italic",margin:0}}>Що обереш?</p>{["a","b"].map(sd=>{const o=p[sd],iA=am===sd,iO=am&&am!==sd;return <button key={sd} onClick={()=>!am&&pk(sd)} style={{background:"#fff",border:`2px solid ${iA?C.accent:C.border}`,borderRadius:16,padding:"24px",cursor:am?"default":"pointer",textAlign:"center",transition:"all .25s",display:"flex",flexDirection:"column",alignItems:"center",gap:5,transform:iA?"scale(1.04)":iO?"scale(.95)":"none",opacity:iO?.3:1}}><span style={{fontSize:44}}>{o.e}</span><span style={{fontFamily:"Cormorant Garamond,serif",fontSize:20,fontWeight:600,color:C.ink}}>{o.l}</span><span style={{fontFamily:"Montserrat,sans-serif",fontSize:11,color:C.muted}}>{o.d}</span></button>})}</div></div>}
+function AQuiz({onD}){
+  const[questions]=useState(()=>pickQuestions());
+  const[s,ss]=useState(0);
+  const[a,sa]=useState([]);
+  const[am,sam]=useState(null);
+  const p=questions[s];
+  const total=questions.length;
+  const pk=sd=>{
+    sam(sd);
+    const choice=sd==="a"?p.a.l:p.b.l;
+    track("archquiz_answer",{q:s+1,question:p.q,axis:p.axis,choice});
+    setTimeout(()=>{
+      const n=[...a,sd];
+      if(n.length>=total){track("archquiz_complete");onD({answers:n,questions})}
+      else{sa(n);ss(s+1);sam(null)}
+    },280);
+  };
+  if(!p)return null;
+  return <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",padding:"24px"}}>
+    <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:28}}>
+      <div style={{flex:1,height:4,background:C.border,borderRadius:2,overflow:"hidden"}}>
+        <div style={{width:`${(s/total)*100}%`,height:"100%",background:C.accent,borderRadius:2,transition:"width .3s"}}/>
+      </div>
+      <span style={{fontFamily:"Montserrat,sans-serif",fontSize:13,color:C.muted,fontWeight:600}}>{s+1}/{total}</span>
+    </div>
+    <div style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"center",gap:20,maxWidth:480,margin:"0 auto",width:"100%"}}>
+      <p style={{fontFamily:"Cormorant Garamond,serif",fontSize:22,color:C.ink,textAlign:"center",fontStyle:"italic",margin:0,lineHeight:1.4,padding:"0 8px"}}>{p.q}</p>
+      <div style={{display:"flex",flexDirection:"column",gap:12}}>
+        {["a","b"].map(sd=>{
+          const o=p[sd],iA=am===sd,iO=am&&am!==sd;
+          return <button key={sd} onClick={()=>!am&&pk(sd)} style={{background:"#fff",border:`2px solid ${iA?C.accent:C.border}`,borderRadius:14,padding:"20px 24px",cursor:am?"default":"pointer",textAlign:"center",transition:"all .25s",transform:iA?"scale(1.03)":iO?"scale(.97)":"none",opacity:iO?.4:1}}>
+            <span style={{fontFamily:"Cormorant Garamond,serif",fontSize:20,fontWeight:500,color:C.ink}}>{o.l}</span>
+          </button>
+        })}
+      </div>
+    </div>
+  </div>
+}
 
 function ProfileScr({arch,coins,bdgs,iq,learned,curBdg,expanded,setExpanded,go,onLearn,onBdg,onShare}){
   const nextB=bdgs[curBdg];
@@ -273,10 +371,27 @@ function ProfileScr({arch,coins,bdgs,iq,learned,curBdg,expanded,setExpanded,go,o
       <span style={{color:C.muted,fontSize:16}}>{expanded?"▲":"▼"}</span>
     </button>
     {expanded&&<div style={{background:C.ink,borderRadius:"0 0 14px 14px",padding:"0 18px 18px",marginBottom:14}}>
-      <p style={{fontFamily:"Cormorant Garamond,serif",fontSize:15,color:C.paper+"cc",lineHeight:1.6,margin:"0 0 12px",fontStyle:"italic"}}>{arch.d}</p>
-      <div style={{background:C.gold+"15",borderRadius:10,padding:"10px 14px",marginBottom:10}}><p style={{fontFamily:"Montserrat,sans-serif",fontSize:9,fontWeight:600,letterSpacing:1.5,color:C.gold,margin:"0 0 4px"}}>СУПЕРСИЛА</p><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:14,color:C.paper,margin:0}}>{arch.sup}</p></div>
-      {[{i:"🍽️",l:"Вечеря",t:arch.din},{i:"🏠",l:"Ресторан",t:arch.res},{i:"🧭",l:"Спробуй",t:arch.try_},{i:"👨‍👩‍👧",l:"На кухні друзів",t:arch.fr}].map((x,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:6}}><span style={{fontSize:14}}>{x.i}</span><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:13,color:C.paper+"bb",margin:0}}><span style={{color:C.muted,fontSize:10}}>{x.l}: </span>{x.t}</p></div>)}
-      <div style={{background:C.accent+"20",borderRadius:10,padding:"10px 14px",marginTop:10}}><p style={{fontFamily:"Montserrat,sans-serif",fontSize:9,fontWeight:600,letterSpacing:1.5,color:C.accent,margin:"0 0 4px"}}>🌗 ТІНЬ: {arch.sh}</p><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:13,color:C.paper+"bb",margin:0,fontStyle:"italic"}}>{arch.shd}</p></div>
+      <p style={{fontFamily:"Cormorant Garamond,serif",fontSize:15,color:C.paper+"cc",lineHeight:1.6,margin:"0 0 14px",fontStyle:"italic"}}>{arch.d}</p>
+      {arch.spectrum&&<div style={{marginBottom:14}}>
+        {[{k:"sCr",c:C.accent},{k:"rSp",c:C.accent2},{k:"pA",c:C.accent3},{k:"cE",c:C.gold}].map(({k,c})=>{
+          const sp=arch.spectrum[k];if(!sp||sp.total===0)return null;
+          const leftPct=Math.round((sp.left/sp.total)*100);
+          return <div key={k} style={{marginBottom:8}}>
+            <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
+              <span style={{fontFamily:"Montserrat,sans-serif",fontSize:9,color:C.paper+"99"}}>{sp.leftLabel} {leftPct}%</span>
+              <span style={{fontFamily:"Montserrat,sans-serif",fontSize:9,color:C.paper+"99"}}>{100-leftPct}% {sp.rightLabel}</span>
+            </div>
+            <div style={{height:4,background:C.paper+"15",borderRadius:2,overflow:"hidden",position:"relative"}}>
+              <div style={{position:"absolute",left:0,top:0,height:"100%",width:`${leftPct}%`,background:c,borderRadius:2}}/>
+            </div>
+          </div>
+        })}
+      </div>}
+      <div style={{background:C.gold+"15",borderRadius:10,padding:"10px 14px",marginBottom:8}}><p style={{fontFamily:"Montserrat,sans-serif",fontSize:9,fontWeight:600,letterSpacing:1.5,color:C.gold,margin:"0 0 4px"}}>⚡ СУПЕРСИЛА</p><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:14,color:C.paper,margin:0,lineHeight:1.4}}>{arch.sup}</p></div>
+      {arch.punkt&&<div style={{background:C.accent3+"25",borderRadius:10,padding:"10px 14px",marginBottom:8}}><p style={{fontFamily:"Montserrat,sans-serif",fontSize:9,fontWeight:600,letterSpacing:1.5,color:"#7BB6E0",margin:"0 0 4px"}}>🎯 ТВІЙ ПУНКТИК</p><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:14,color:C.paper,margin:0,lineHeight:1.4}}>{arch.punkt}</p></div>}
+      {arch.pravda&&<div style={{background:C.accent2+"25",borderRadius:10,padding:"10px 14px",marginBottom:8}}><p style={{fontFamily:"Montserrat,sans-serif",fontSize:9,fontWeight:600,letterSpacing:1.5,color:"#5EBE94",margin:"0 0 4px"}}>🤫 ЩИРА ПРАВДА</p><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:14,color:C.paper,margin:0,lineHeight:1.4}}>{arch.pravda}</p></div>}
+      {arch.gniv&&<div style={{background:C.accent+"25",borderRadius:10,padding:"10px 14px",marginBottom:8}}><p style={{fontFamily:"Montserrat,sans-serif",fontSize:9,fontWeight:600,letterSpacing:1.5,color:"#E07444",margin:"0 0 4px"}}>😤 ТВІЙ ГНІВ</p><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:14,color:C.paper,margin:0,lineHeight:1.4}}>{arch.gniv}</p></div>}
+      <div style={{background:C.paper+"08",borderRadius:10,padding:"10px 14px",marginTop:10,border:`1px solid ${C.paper}15`}}><p style={{fontFamily:"Montserrat,sans-serif",fontSize:9,fontWeight:600,letterSpacing:1.5,color:C.muted,margin:"0 0 4px"}}>🌗 ТІНЬ: {arch.sh}</p><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:13,color:C.paper+"bb",margin:0,fontStyle:"italic",lineHeight:1.4}}>{arch.shd}</p></div>
       <button onClick={onShare} style={{width:"100%",background:C.gold+"20",border:`1px solid ${C.gold}40`,borderRadius:10,padding:"12px",cursor:"pointer",marginTop:12,fontFamily:"Montserrat,sans-serif",fontSize:12,fontWeight:600,color:C.gold}}>📤 Поділитись архетипом</button>
     </div>}
     {!expanded&&<div style={{height:14}}/>}
@@ -392,6 +507,8 @@ export default function App(){
         updated_at:new Date().toISOString(),
         ...overrides
       };
+      // Save spectrum in badges field as a side-channel since we don't have a column for it
+      // Better approach: just include in archetype state
       await supabase.from("profiles").update(payload).eq("id",user.id);
     }catch(e){console.log("save err",e)}
     setSaving(false);
@@ -431,7 +548,7 @@ export default function App(){
 
   return <div style={{minHeight:"100vh",background:C.paper}}>
     <style>{`@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Montserrat:wght@400;500;600;700&display=swap');*{box-sizing:border-box;margin:0;padding:0}body{background:${C.paper}}button:active{transform:scale(.97)!important}`}</style>
-    <AuthBtn/>
+    {scr!=="dashboard"&&<AuthBtn/>}
     {saving&&<div style={{position:"fixed",top:12,left:"50%",transform:"translateX(-50%)",zIndex:200,background:C.accent2,color:"#fff",borderRadius:12,padding:"4px 12px",fontFamily:"Montserrat,sans-serif",fontSize:10}}>💾</div>}
     {pop&&<Pop amt={pop.amt} txt={pop.txt} onD={()=>sp(null)}/>}
     {showRec&&<RecPop badgeIdx={curBdg} onC={()=>ssr(false)}/>}
@@ -439,7 +556,7 @@ export default function App(){
     {showShare&&arch&&<ShareCard arch={arch} onC={()=>setShowShare(false)}/>}
     {actB&&scr==="profile"&&<BModal b={actB} bi={actBi} curBdg={curBdg} onL={()=>{sab(null);go("learn")}} onQ={()=>{sab(null);go("iqquiz")}} onC={()=>sab(null)}/>}
     {scr==="intro"&&<Intro go={()=>{addC(100,"Ласкаво просимо!");setTimeout(()=>go("archquiz"),1900)}}/>}
-    {scr==="archquiz"&&<AQuiz onD={a=>{const r=calc(a);sa(r);track("archetype_result",{archetype:r.id,name:r.n});addC(50,"Архетип визначено!");setTimeout(()=>{go("profile");if(!user)setShowAuth(true);else setShowShare(true)},1900)}}/>}
+    {scr==="archquiz"&&<AQuiz onD={({answers,questions})=>{const r=calc(answers,questions);sa(r);track("archetype_result",{archetype:r.id,name:r.n});addC(50,"Архетип визначено!");setTimeout(()=>{go("profile");if(!user)setShowAuth(true);else setShowShare(true)},1900)}}/>}
     {scr==="profile"&&arch&&<ProfileScr arch={arch} coins={coins} bdgs={bdgs} iq={iq} learned={learned} curBdg={curBdg} expanded={archExp} setExpanded={sae} go={go} onLearn={()=>{sae(false);track("learn_navigate",{badge:BADGE_DATA[curBdg]?.id});go("learn")}} onBdg={(b,i)=>{sab(b);sabi(i)}} onShare={()=>{track("share_open");setShowShare(true)}}/>}
     {scr==="learn"&&<Learn badgeIdx={curBdg} coins={coins} setCn={sc} go={go} onD={s=>{sls(s);sl(l=>l+s.total);go("ldone")}}/>}
     {scr==="ldone"&&lSt&&<LDone stats={lSt} badgeIdx={curBdg} onRec={()=>ssr(true)} onBack={()=>{if(lSt.allDone){go("iqquiz")}else go("profile")}}/>}
@@ -492,7 +609,7 @@ function Dashboard({go}){
 
   // Quiz answers per question
   const quizAnswers={};
-  evOf("archquiz_answer").forEach(e=>{const q=e.data?.q;const ch=e.data?.choice;if(q){if(!quizAnswers[q])quizAnswers[q]={pair:e.data?.pair,answers:{},users:new Set()};quizAnswers[q].answers[ch]=(quizAnswers[q].answers[ch]||0)+1;quizAnswers[q].users.add(e.user_id||e.id)}});
+  evOf("archquiz_answer").forEach(e=>{const q=e.data?.question;const ch=e.data?.choice;const ax=e.data?.axis;if(q){if(!quizAnswers[q])quizAnswers[q]={question:q,axis:ax,answers:{},users:new Set()};quizAnswers[q].answers[ch]=(quizAnswers[q].answers[ch]||0)+1;quizAnswers[q].users.add(e.user_id||e.id)}});
 
   // Learning cards
   const learnCards={};
@@ -560,12 +677,12 @@ function Dashboard({go}){
     </Card>}
 
     {Object.keys(quizAnswers).length>0&&<Card title="Квіз архетипу — відповіді по питаннях">
-      {Object.entries(quizAnswers).sort((a,b)=>Number(a[0])-Number(b[0])).map(([q,data])=>{
+      {Object.entries(quizAnswers).map(([q,data])=>{
         const total=Object.values(data.answers).reduce((s,v)=>s+v,0);
         return <div key={q} style={{marginBottom:14,padding:"10px",background:S.accent,borderRadius:8}}>
-          <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
-            <span style={{fontFamily:S.font,fontSize:10,color:S.muted}}>Q{q}: {data.pair}</span>
-            <span style={{fontFamily:S.font,fontSize:9,color:S.muted}}>{data.users.size} юз.</span>
+          <div style={{display:"flex",justifyContent:"space-between",marginBottom:6,gap:8}}>
+            <span style={{fontFamily:S.font,fontSize:10,color:S.text,flex:1}}>{data.question}{data.axis?` [${data.axis}]`:""}</span>
+            <span style={{fontFamily:S.font,fontSize:9,color:S.muted,whiteSpace:"nowrap"}}>{data.users.size} юз.</span>
           </div>
           {Object.entries(data.answers).sort((a,b)=>b[1]-a[1]).map(([ans,cnt],i)=><div key={i} style={{marginBottom:4}}>
             <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
