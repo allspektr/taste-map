@@ -7,34 +7,34 @@ const track=async(event,data={})=>{try{const{data:{session}}=await supabase.auth
 
 /* ═══ 24 ORACLE QUESTIONS — 6 per axis ═══ */
 const ALL_PAIRS=[
-// S/Cr — Source vs Craft
-{q:"Бачиш ідеальний продукт. Твоє его дозволить йому просто бути?",a:{l:"Лише сіль",v:"S"},b:{l:"Додам магії",v:"Cr"},axis:"S/Cr"},
-{q:"Хто ти сьогодні у цьому гастро-безумстві?",a:{l:"Мудрий пурист",v:"S"},b:{l:"Шалений алхімік",v:"Cr"},axis:"S/Cr"},
-{q:"Ідеальний вечір. На столі одна страва. Вона...",a:{l:"Проста",v:"S"},b:{l:"Складна симфонія",v:"Cr"},axis:"S/Cr"},
-{q:"Тобі дарують трюфель. Твоя перша думка?",a:{l:"Настругати",v:"S"},b:{l:"Зробити соус",v:"Cr"},axis:"S/Cr"},
-{q:"Перед тобою стейк за $100. Твоя релігія дозволяє маринад?",a:{l:"Лише сіль",v:"S"},b:{l:"Додам нюансів",v:"Cr"},axis:"S/Cr"},
-{q:"Ти знайшов ідеальний томат. Твій наступний крок?",a:{l:"Просто вкушу",v:"S"},b:{l:"Зроблю гаспачо",v:"Cr"},axis:"S/Cr"},
-// R/Sp — Ritual vs Spontaneity
-{q:"Дзвінок у двері за 20 хвилин. Твій внутрішній стан?",a:{l:"Сталевий план",v:"R"},b:{l:"Повний джаз",v:"Sp"},axis:"R/Sp"},
-{q:"Ранок неділі. Твоя кухня сьогодні — це...",a:{l:"Ритуал",v:"R"},b:{l:"Веселий хаос",v:"Sp"},axis:"R/Sp"},
-{q:"В рецепті написано «за смаком». Твоя реакція?",a:{l:"Дратує. Дай грами",v:"R"},b:{l:"Нарешті! Свобода",v:"Sp"},axis:"R/Sp"},
-{q:"Готуєш для 10 людей. Твій підхід?",a:{l:"Таймінг/План",v:"R"},b:{l:"Буде що буде",v:"Sp"},axis:"R/Sp"},
-{q:"Новий кухонний гаджет у руках. Твої дії?",a:{l:"Читаю мануал",v:"R"},b:{l:"Тисну кнопки",v:"Sp"},axis:"R/Sp"},
-{q:"Ти в супермаркеті. Твій шлях поміж рядами — це...",a:{l:"Чіткий список",v:"R"},b:{l:"Куди занесе",v:"Sp"},axis:"R/Sp"},
-// P/A — Power vs Aesthetics
-{q:"День — катастрофа. Чим будеш лікувати душу?",a:{l:"Ситне тепло",v:"P"},b:{l:"Витончена краса",v:"A"},axis:"P/A"},
-{q:"Створюєш шедевр. Твоя гордість тримається на...",a:{l:"Потужному смаку",v:"P"},b:{l:"Бездоганному кадрі",v:"A"},axis:"P/A"},
-{q:"Вибір ресторану. Що вирішує?",a:{l:"Порції та ситість",v:"P"},b:{l:"Атмосфера/Подача",v:"A"},axis:"P/A"},
-{q:"Запрошення на ТБ-шоу. Твоя стратегія?",a:{l:"Зроблю найсмачніше",v:"P"},b:{l:"Зроблю найкрасивіше",v:"A"},axis:"P/A"},
-{q:"Викладаєш страву на тарілку. Внутрішній голос каже:",a:{l:"«Аби гаряче»",v:"P"},b:{l:"«Ще один штрих»",v:"A"},axis:"P/A"},
-{q:"Найкращий комплімент твоєму таланту:",a:{l:"«Я наївся!»",v:"P"},b:{l:"«Це шедевр!»",v:"A"},axis:"P/A"},
-// C/E — Comfort vs Expression
-{q:"У меню назва, схожа на закляття. Твоя реакція?",a:{l:"Дайте знайоме",v:"C"},b:{l:"Везіть невідомість",v:"E"},axis:"C/E"},
-{q:"Тобі кажуть: «Це занадто дивно!». Твій мозок видає:",a:{l:"Треба виправити",v:"C"},b:{l:"Це комплімент!",v:"E"},axis:"C/E"},
-{q:"Відпустка. Як обираєш місце для обіду?",a:{l:"Де радять місцеві",v:"C"},b:{l:"Де ніхто не був",v:"E"},axis:"C/E"},
-{q:"Готуєш улюблену страву. Ти...",a:{l:"Не змінюю роками",v:"C"},b:{l:"Постійно експериментую",v:"E"},axis:"C/E"},
-{q:"Відкриваєш меню на 20 сторінок. Палець шукає:",a:{l:"Знайому гавань",v:"C"},b:{l:"Квиток у пригоду",v:"E"},axis:"C/E"},
-{q:"Шеф каже: «Я приготую імпровізацію». Твій стан?",a:{l:"Розкажи спершу",v:"C"},b:{l:"Я в твоїх руках",v:"E"},axis:"C/E"},
+// S/Cr — Природа vs Алхімія
+{q:"Бачиш ідеальний продукт. Твоє его дозволить йому просто бути?",emoji:"🍅",a:{l:"Лише сіль",v:"S"},b:{l:"Додам магії",v:"Cr"},axis:"S/Cr"},
+{q:"Хто ти сьогодні у цьому гастро-безумстві?",emoji:"🎭",a:{l:"Мудрий пурист",v:"S"},b:{l:"Шалений алхімік",v:"Cr"},axis:"S/Cr"},
+{q:"Ідеальний вечір. На столі одна страва. Вона...",emoji:"🍽️",a:{l:"Чесна простота",v:"S"},b:{l:"Складна симфонія",v:"Cr"},axis:"S/Cr"},
+{q:"Тобі дарують трюфель. Твоя перша думка?",emoji:"🍄",a:{l:"Настругати",v:"S"},b:{l:"Зробити соус",v:"Cr"},axis:"S/Cr"},
+{q:"Перед тобою стейк за $100. Твоя релігія дозволяє маринад?",emoji:"🥩",a:{l:"Лише сіль",v:"S"},b:{l:"Додам нюансів",v:"Cr"},axis:"S/Cr"},
+{q:"Ти знайшов ідеальний томат. Твій наступний крок?",emoji:"🍅",a:{l:"Просто вкушу",v:"S"},b:{l:"Зроблю гаспачо",v:"Cr"},axis:"S/Cr"},
+// R/Sp — Ритуал vs Спонтанність
+{q:"Дзвінок у двері за 20 хвилин. Твій внутрішній стан?",emoji:"🚪",a:{l:"Сталевий план",v:"R"},b:{l:"Повний джаз",v:"Sp"},axis:"R/Sp"},
+{q:"Ранок неділі. Твоя кухня сьогодні — це...",emoji:"☕",a:{l:"Ритуал",v:"R"},b:{l:"Веселий хаос",v:"Sp"},axis:"R/Sp"},
+{q:"В рецепті написано «за смаком». Твоя реакція?",emoji:"📖",a:{l:"Дратує. Дай грами",v:"R"},b:{l:"Нарешті! Свобода",v:"Sp"},axis:"R/Sp"},
+{q:"Готуєш для 10 людей. Твій підхід?",emoji:"👥",a:{l:"Таймінг/План",v:"R"},b:{l:"Буде що буде",v:"Sp"},axis:"R/Sp"},
+{q:"Новий кухонний гаджет у руках. Твої дії?",emoji:"🔪",a:{l:"Читаю мануал",v:"R"},b:{l:"Тисну кнопки",v:"Sp"},axis:"R/Sp"},
+{q:"Ти в супермаркеті. Твій шлях поміж рядами — це...",emoji:"🛒",a:{l:"Чіткий список",v:"R"},b:{l:"Куди занесе",v:"Sp"},axis:"R/Sp"},
+// P/A — Глибина vs Краса
+{q:"День — катастрофа. Чим будеш лікувати душу?",emoji:"💔",a:{l:"Ситне тепло",v:"P"},b:{l:"Витончена краса",v:"A"},axis:"P/A"},
+{q:"Створюєш шедевр. Твоя гордість тримається на...",emoji:"⭐",a:{l:"Потужному смаку",v:"P"},b:{l:"Бездоганному кадрі",v:"A"},axis:"P/A"},
+{q:"Вибір ресторану. Що вирішує?",emoji:"🍴",a:{l:"Порції та ситість",v:"P"},b:{l:"Атмосфера/Подача",v:"A"},axis:"P/A"},
+{q:"Запрошення на ТБ-шоу. Твоя стратегія?",emoji:"📺",a:{l:"Зроблю найсмачніше",v:"P"},b:{l:"Зроблю найкрасивіше",v:"A"},axis:"P/A"},
+{q:"Викладаєш страву на тарілку. Внутрішній голос каже:",emoji:"🍽️",a:{l:"«Аби гаряче»",v:"P"},b:{l:"«Ще один штрих»",v:"A"},axis:"P/A"},
+{q:"Найкращий комплімент твоєму таланту:",emoji:"💬",a:{l:"«Я наївся!»",v:"P"},b:{l:"«Це шедевр!»",v:"A"},axis:"P/A"},
+// C/E — Знайоме vs Невідоме
+{q:"У меню назва, схожа на закляття. Твоя реакція?",emoji:"📜",a:{l:"Дайте знайоме",v:"C"},b:{l:"Везіть невідомість",v:"E"},axis:"C/E"},
+{q:"Тобі кажуть: «Це занадто дивно!». Твій мозок видає:",emoji:"🤔",a:{l:"Треба виправити",v:"C"},b:{l:"Це комплімент!",v:"E"},axis:"C/E"},
+{q:"Відпустка. Перед обідом ти...",emoji:"✈️",a:{l:"Читаю топ-10",v:"C"},b:{l:"Йду на запах",v:"E"},axis:"C/E"},
+{q:"Готуєш улюблену страву. Ти...",emoji:"❤️",a:{l:"Не змінюю роками",v:"C"},b:{l:"Постійно експериментую",v:"E"},axis:"C/E"},
+{q:"Відкриваєш меню на 20 сторінок. Палець шукає:",emoji:"📋",a:{l:"Знайому гавань",v:"C"},b:{l:"Квиток у пригоду",v:"E"},axis:"C/E"},
+{q:"Шеф каже: «Я приготую імпровізацію». Твій стан?",emoji:"👨‍🍳",a:{l:"Розкажи спершу",v:"C"},b:{l:"Я в твоїх руках",v:"E"},axis:"C/E"},
 ];
 
 // Pick 4 random questions per axis = 16 total
@@ -192,7 +192,63 @@ recipe:{e:"🧀",t:"Полуниця з пармезаном і бальзамі
 }
 ];
 
-/* ═══ ATLAS DATA ═══ */
+/* ═══ ARCHETYPE → RECOMMENDED BADGE MAPPING ═══ */
+// Maps archetype id to recommended starting badge index in BADGE_DATA
+// 0=basics, 1=maillard, 2=slow, 3=nofire, 4=pairing
+const ARCH_TO_BADGE={
+  "S-R-P-C":0,    // Моноліт → Основи смаку
+  "S-R-P-E":1,    // Гранд-Майстер → Реакція Мейяра
+  "S-R-A-C":0,    // Святилище → Основи смаку
+  "S-R-A-E":2,    // Куратор → Повільний жар
+  "S-Sp-P-C":0,   // Стихія → Основи смаку
+  "S-Sp-P-E":1,   // Пророк Вогню → Реакція Мейяра
+  "S-Sp-A-C":2,   // Поет Повсякденності → Повільний жар
+  "S-Sp-A-E":3,   // Візіонер → Без вогню
+  "Cr-R-P-C":0,   // Архітектор Роду → Основи смаку
+  "Cr-R-P-E":1,   // Алхімік Світла → Реакція Мейяра
+  "Cr-R-A-C":4,   // Ткач Гармонії → Поєднання
+  "Cr-R-A-E":4,   // Режисер Смаку → Поєднання
+  "Cr-Sp-P-C":0,  // Душа Застілля → Основи смаку
+  "Cr-Sp-P-E":1,  // Руйнівник Кордонів → Реакція Мейяра
+  "Cr-Sp-A-C":4,  // Майстер Балансу → Поєднання
+  "Cr-Sp-A-E":3,  // Авангардист → Без вогню
+};
+
+/* ═══ ARCHETYPE-SPECIFIC LEARNING HOOKS ═══ */
+// Hook text for the learning button, customized per archetype
+const ARCH_LEARN_HOOK={
+  "S-R-P-C":"Зрозумій основи смаку — фундамент твоєї кухні",
+  "S-R-P-E":"Опануй науку Мейяра — звідки береться твоя досконалість",
+  "S-R-A-C":"Вивчи основи смаку — щоб гармонія стала свідомою",
+  "S-R-A-E":"Розгадай повільний жар — терпіння як форма мистецтва",
+  "S-Sp-P-C":"Дізнайся секрети основ — твоя сила потребує знань",
+  "S-Sp-P-E":"Розкрий науку вогню — підкори те, що відчуваєш шкірою",
+  "S-Sp-A-C":"Опануй повільний жар — поезія потребує техніки",
+  "S-Sp-A-E":"Вивчи мистецтво без вогню — нові виміри текстур",
+  "Cr-R-P-C":"Зрозумій основи смаку — фундамент твоїх традицій",
+  "Cr-R-P-E":"Опануй науку Мейяра — алхімія потребує точності",
+  "Cr-R-A-C":"Розгадай таємниці поєднань — чому смаки співають",
+  "Cr-R-A-E":"Вивчи поєднання — концепція починається з гармонії",
+  "Cr-Sp-P-C":"Освой основи смаку — щоб щедрість мала глибину",
+  "Cr-Sp-P-E":"Розкрий науку Мейяра — бунт потребує знань",
+  "Cr-Sp-A-C":"Опануй поєднання — лінива елегантність через знання",
+  "Cr-Sp-A-E":"Вивчи кулінарію без вогню — твоя провокація на новому рівні",
+};
+
+/* ═══ LEVELS (based on points: 5 per card view, 20 per correct quiz answer) ═══ */
+const LEVELS=[
+  {min:0,max:100,e:"🌱",n:"Початківець"},
+  {min:100,max:300,e:"🍳",n:"Аматор"},
+  {min:300,max:500,e:"👨‍🍳",n:"Шеф вдома"},
+  {min:500,max:750,e:"⭐",n:"Кулінарний експерт"},
+  {min:750,max:9999,e:"🏆",n:"Магістр смаку"},
+];
+const calcLevel=(pts)=>{
+  for(let i=LEVELS.length-1;i>=0;i--)if(pts>=LEVELS[i].min)return{...LEVELS[i],idx:i};
+  return{...LEVELS[0],idx:0};
+};
+const calcPoints=(cardsViewed,quizCorrect)=>cardsViewed*5+quizCorrect*20;
+
 const BEEF_PASSPORT={tagline:"Потужний умамі · Глибокий смак · Щільне",desc:"При 140°C Мейяр створює 600+ сполук. Колаген стає желатином при тривалому нагріванні.",umami:88,fat:55};
 const BEEF_GROUPS=[
 {id:"no-fire",em:"🌱",label:"Без вогню",desc:"Кислота і сіль як замінник t°",color:C.accent2,transforms:[
@@ -236,10 +292,10 @@ function calc(answers,questions){
   const arch=ARCH.find(x=>x.id===id)||ARCH[0];
   // Calculate spectrum percentages for visualization
   const spectrum={
-    sCr:{left:s.S,right:s.Cr,total:s.S+s.Cr,leftLabel:"Source",rightLabel:"Craft"},
-    rSp:{left:s.R,right:s.Sp,total:s.R+s.Sp,leftLabel:"Ritual",rightLabel:"Spontaneity"},
-    pA:{left:s.P,right:s.A,total:s.P+s.A,leftLabel:"Power",rightLabel:"Aesthetics"},
-    cE:{left:s.C,right:s.E,total:s.C+s.E,leftLabel:"Comfort",rightLabel:"Expression"}
+    sCr:{left:s.S,right:s.Cr,total:s.S+s.Cr,leftLabel:"Природа",rightLabel:"Алхімія"},
+    rSp:{left:s.R,right:s.Sp,total:s.R+s.Sp,leftLabel:"Ритуал",rightLabel:"Спонтанність"},
+    pA:{left:s.P,right:s.A,total:s.P+s.A,leftLabel:"Глибина",rightLabel:"Краса"},
+    cE:{left:s.C,right:s.E,total:s.C+s.E,leftLabel:"Знайоме",rightLabel:"Невідоме"}
   };
   return{...arch,spectrum};
 }
@@ -252,7 +308,7 @@ function ShareCard({arch,onC}){
   const[copied,setCopied]=useState(false);
   const url="https://taste-map-liart.vercel.app";
   const copyLink=()=>{navigator.clipboard.writeText(url+"?ref=share").then(()=>{setCopied(true);setTimeout(()=>setCopied(false),2000)})};
-  const shareNative=()=>{if(navigator.share)navigator.share({title:"Смакова Карта",text:`Мій кулінарний архетип — ${arch.e} ${arch.n}. Дізнайся свій!`,url:url+"?ref=share"}).catch(()=>{});else copyLink()};
+  const shareNative=()=>{const text=`Мій кулінарний архетип — ${arch.e} ${arch.n}. Дізнайся свій: ${url}?ref=share`;if(navigator.share)navigator.share({title:"Кулінарний Оракул",text,url:url+"?ref=share"}).catch(()=>{});else navigator.clipboard.writeText(text).then(()=>{setCopied(true);setTimeout(()=>setCopied(false),2000)})};
   const downloadCard=()=>{
     const cv=document.createElement("canvas");cv.width=1080;cv.height=1920;const ctx=cv.getContext("2d");
     // Background
@@ -275,7 +331,7 @@ function ShareCard({arch,onC}){
     sw.forEach(w=>{const test=line+w+" ";if(ctx.measureText(test).width>750){ctx.fillText(line.trim(),540,y);y+=40;line=w+" "}else line=test});
     if(line)ctx.fillText(line.trim(),540,y);
     // Footer
-    ctx.fillStyle="#9A8F7E";ctx.font="24px Montserrat, sans-serif";ctx.fillText("🧬 СМАКОВА КАРТА",540,1720);
+    ctx.fillStyle="#9A8F7E";ctx.font="24px Montserrat, sans-serif";ctx.fillText("🔮 КУЛІНАРНИЙ ОРАКУЛ",540,1720);
     ctx.font="20px Montserrat, sans-serif";ctx.fillText("taste-map-liart.vercel.app",540,1760);
     // Download
     const a=document.createElement("a");a.download=`taste-map-${arch.id}.png`;a.href=cv.toDataURL("image/png");a.click();
@@ -320,7 +376,30 @@ function AuthPrompt({onLogin,onSkip}){
 }
 
 /* ═══ SCREENS ═══ */
-function Intro({go}){useEffect(()=>{track("page_view",{page:"intro"})},[]);return <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"100vh",padding:"40px 24px",textAlign:"center"}}><div style={{fontSize:72,marginBottom:24}}>🧬</div><h1 style={{fontFamily:"Cormorant Garamond,serif",fontSize:42,fontWeight:300,color:C.ink,margin:"0 0 8px",letterSpacing:4}}>СМАКОВА КАРТА</h1><div style={{width:40,height:2,background:C.accent,margin:"0 auto 20px"}}/><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:20,color:C.muted,fontStyle:"italic",margin:"0 0 40px",maxWidth:380,lineHeight:1.5}}>Обирай їжу — дізнайся хто ти</p><button onClick={()=>{track("quiz_start");go()}} style={{background:C.ink,color:C.paper,border:"none",borderRadius:10,padding:"16px 48px",fontFamily:"Cormorant Garamond,serif",fontSize:20,letterSpacing:2,cursor:"pointer"}}>ПОЧАТИ</button></div>}
+function Intro({go}){
+  useEffect(()=>{track("page_view",{page:"intro"})},[]);
+  return <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"100vh",padding:"40px 24px",textAlign:"center"}}>
+    <div style={{fontSize:64,marginBottom:20}}>🔮</div>
+    <h1 style={{fontFamily:"Cormorant Garamond,serif",fontSize:38,fontWeight:300,color:C.ink,margin:"0 0 6px",letterSpacing:3}}>КУЛІНАРНИЙ</h1>
+    <h1 style={{fontFamily:"Cormorant Garamond,serif",fontSize:38,fontWeight:300,color:C.ink,margin:"0 0 8px",letterSpacing:3}}>ОРАКУЛ</h1>
+    <div style={{width:40,height:2,background:C.accent,margin:"0 auto 24px"}}/>
+    <p style={{fontFamily:"Cormorant Garamond,serif",fontSize:18,color:C.ink,fontStyle:"italic",margin:"0 0 28px",maxWidth:420,lineHeight:1.6}}>
+      «Твій шлунок може брехати, твої вподобання — змінюватися, але твоє <b>ставлення до вогню та тарілки</b> — це твій паспорт».
+    </p>
+    <div style={{background:C.paper2,borderRadius:14,padding:"18px 22px",maxWidth:420,marginBottom:32,textAlign:"left"}}>
+      <p style={{fontFamily:"Cormorant Garamond,serif",fontSize:15,color:C.ink,margin:"0 0 10px",lineHeight:1.5}}>
+        Я задам тобі <b>16 запитань про кухню</b> — про вогонь, продукти, ритуали і твої смакові звички.
+      </p>
+      <p style={{fontFamily:"Cormorant Garamond,serif",fontSize:15,color:C.ink,margin:"0 0 10px",lineHeight:1.5}}>
+        У відповідь розповім хто ти на кухні, в чому твоя сила, і яка тінь чекає за дверима.
+      </p>
+      <p style={{fontFamily:"Montserrat,sans-serif",fontSize:11,color:C.muted,margin:0,letterSpacing:0.5}}>
+        ⏱ 2 хвилини · 16 питань · 1 правда про тебе
+      </p>
+    </div>
+    <button onClick={()=>{track("quiz_start");go()}} style={{background:C.ink,color:C.paper,border:"none",borderRadius:10,padding:"16px 48px",fontFamily:"Cormorant Garamond,serif",fontSize:20,letterSpacing:2,cursor:"pointer"}}>ПОЧАТИ</button>
+  </div>
+}
 
 function AQuiz({onD}){
   const[questions]=useState(()=>pickQuestions());
@@ -340,6 +419,18 @@ function AQuiz({onD}){
     },280);
   };
   if(!p)return null;
+  // Bold first significant noun/verb in the question
+  const renderQuestion=(text)=>{
+    // Find first comma/period to bold the first phrase if it's a setup
+    const parts=text.split(/(\.|,|—|:)/);
+    if(parts.length>=2){
+      return <>
+        <b style={{fontWeight:600}}>{parts[0]}</b>
+        {parts.slice(1).join("")}
+      </>;
+    }
+    return text;
+  };
   return <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",padding:"24px"}}>
     <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:28}}>
       <div style={{flex:1,height:4,background:C.border,borderRadius:2,overflow:"hidden"}}>
@@ -347,8 +438,11 @@ function AQuiz({onD}){
       </div>
       <span style={{fontFamily:"Montserrat,sans-serif",fontSize:13,color:C.muted,fontWeight:600}}>{s+1}/{total}</span>
     </div>
-    <div style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"center",gap:20,maxWidth:480,margin:"0 auto",width:"100%"}}>
-      <p style={{fontFamily:"Cormorant Garamond,serif",fontSize:22,color:C.ink,textAlign:"center",fontStyle:"italic",margin:0,lineHeight:1.4,padding:"0 8px"}}>{p.q}</p>
+    <div style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"center",gap:24,maxWidth:480,margin:"0 auto",width:"100%"}}>
+      <div style={{textAlign:"center"}}>
+        <div style={{fontSize:48,marginBottom:14,lineHeight:1}}>{p.emoji||"🔮"}</div>
+        <p style={{fontFamily:"Cormorant Garamond,serif",fontSize:22,color:C.ink,fontStyle:"italic",margin:0,lineHeight:1.45,padding:"0 8px"}}>{renderQuestion(p.q)}</p>
+      </div>
       <div style={{display:"flex",flexDirection:"column",gap:12}}>
         {["a","b"].map(sd=>{
           const o=p[sd],iA=am===sd,iO=am&&am!==sd;
@@ -362,9 +456,31 @@ function AQuiz({onD}){
 }
 
 function ProfileScr({arch,coins,bdgs,iq,learned,curBdg,expanded,setExpanded,go,onLearn,onBdg,onShare}){
-  const nextB=bdgs[curBdg];
+  // Calculate total points and level
+  const totalCorrect=bdgs.reduce((s,b)=>s+(b.qs||0),0);
+  const totalCards=learned;
+  const totalPoints=calcPoints(totalCards,totalCorrect);
+  const level=calcLevel(totalPoints);
+  const nextLevel=LEVELS[level.idx+1];
+  const totalCardsMax=BADGE_DATA.reduce((s,b)=>s+(b.cards?.length||0),0);
+  const totalQuizMax=BADGE_DATA.reduce((s,b)=>s+(b.quiz?.length||0),0);
+  // Recommended badge for this archetype
+  const recBadgeIdx=arch?.id?ARCH_TO_BADGE[arch.id]??curBdg:curBdg;
+  const recBadge=BADGE_DATA[recBadgeIdx];
+  const learnHook=arch?.id?ARCH_LEARN_HOOK[arch.id]:"Опануй секрети кулінарії";
+  const recBadgeDone=bdgs[recBadgeIdx]?.done;
+  // If recommended badge is done, show next un-done badge
+  const targetBadgeIdx=recBadgeDone?bdgs.findIndex(b=>!b.done):recBadgeIdx;
+  const targetBadge=targetBadgeIdx>=0?BADGE_DATA[targetBadgeIdx]:null;
+
   return <div style={{minHeight:"100vh",padding:"24px 24px 90px",maxWidth:480,margin:"0 auto"}}>
-    <div style={{display:"flex",justifyContent:"space-between",marginBottom:16}}><div style={{fontFamily:"Montserrat,sans-serif",fontSize:11,color:C.muted}}>🧠 IQ: <b style={{color:C.ink}}>{iq}</b></div><Cn n={coins}/></div>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+      <div style={{display:"flex",alignItems:"center",gap:6}}>
+        <span style={{fontSize:14}}>{level.e}</span>
+        <span style={{fontFamily:"Montserrat,sans-serif",fontSize:11,color:C.ink,fontWeight:600}}>{level.n}</span>
+      </div>
+      <Cn n={coins}/>
+    </div>
     <button onClick={()=>setExpanded(!expanded)} style={{width:"100%",background:C.ink,borderRadius:14,padding:"18px",marginBottom:2,border:"none",cursor:"pointer",textAlign:"left",display:"flex",alignItems:"center",gap:14}}>
       <span style={{fontSize:44}}>{arch.e}</span>
       <div style={{flex:1}}><p style={{fontFamily:"Montserrat,sans-serif",fontSize:9,fontWeight:600,letterSpacing:2,color:C.gold,margin:"0 0 3px"}}>АРХЕТИП</p><h2 style={{fontFamily:"Cormorant Garamond,serif",fontSize:22,fontWeight:400,color:C.paper,margin:0}}>{arch.n}</h2></div>
@@ -395,22 +511,76 @@ function ProfileScr({arch,coins,bdgs,iq,learned,curBdg,expanded,setExpanded,go,o
       <button onClick={onShare} style={{width:"100%",background:C.gold+"20",border:`1px solid ${C.gold}40`,borderRadius:10,padding:"12px",cursor:"pointer",marginTop:12,fontFamily:"Montserrat,sans-serif",fontSize:12,fontWeight:600,color:C.gold}}>📤 Поділитись архетипом</button>
     </div>}
     {!expanded&&<div style={{height:14}}/>}
-    <button onClick={onLearn} style={{width:"100%",background:C.accent,color:"#fff",border:"none",borderRadius:12,padding:"16px",cursor:"pointer",marginBottom:6,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-      <div style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:20}}>{nextB?.e||"📚"}</span><span style={{fontFamily:"Montserrat,sans-serif",fontSize:14,fontWeight:600}}>{nextB?nextB.n:"Всі бейджі пройдено!"}</span></div>
-      <span style={{fontFamily:"Montserrat,sans-serif",fontSize:11,opacity:.8}}>10 карток</span>
-    </button>
-    <p style={{fontFamily:"Montserrat,sans-serif",fontSize:11,color:C.muted,textAlign:"center",marginBottom:20}}>Пройдено: {learned} карток · Бейджів: {bdgs.filter(b=>b.done).length}/{bdgs.length}</p>
-    <p style={{fontFamily:"Montserrat,sans-serif",fontSize:10,fontWeight:600,letterSpacing:2,color:C.muted,marginBottom:10}}>БЕЙДЖІ</p>
-    <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:6,marginBottom:20}}>
-      {bdgs.map((b,i)=><button key={b.id} onClick={()=>onBdg(b,i)} style={{background:b.done?"#fff":C.paper2,border:`1px solid ${b.done?C.accent2+"40":C.border}`,borderRadius:12,padding:"10px 2px",cursor:"pointer",textAlign:"center",opacity:b.done?1:i<=curBdg?.7:.4}}><div style={{fontSize:24}}>{b.e}</div><div style={{fontFamily:"Montserrat,sans-serif",fontSize:7,color:b.done?C.ink:C.muted,marginTop:2}}>{b.n}</div>{b.done&&<div style={{fontFamily:"Montserrat,sans-serif",fontSize:7,color:C.accent2,marginTop:1}}>✅ {b.qs}/7</div>}{!b.done&&i<=curBdg&&<div style={{fontFamily:"Montserrat,sans-serif",fontSize:6,color:C.accent,marginTop:1}}>10 карток</div>}{!b.done&&i>curBdg&&<div style={{fontFamily:"Montserrat,sans-serif",fontSize:6,color:C.muted,marginTop:1}}>🔒</div>}</button>)}
+
+    {/* LEVEL PROGRESS — replaces IQ */}
+    <div style={{background:"#fff",borderRadius:14,padding:"16px 18px",border:`1px solid ${C.border}`,marginBottom:14}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:14}}>
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          <span style={{fontSize:22}}>{level.e}</span>
+          <span style={{fontFamily:"Cormorant Garamond,serif",fontSize:18,fontWeight:600,color:C.ink}}>{level.n}</span>
+        </div>
+        <span style={{fontFamily:"Montserrat,sans-serif",fontSize:18,fontWeight:700,color:C.accent}}>{totalPoints}</span>
+      </div>
+      {/* Multi-level progress bar */}
+      <div style={{position:"relative",height:8,background:C.border,borderRadius:4,marginBottom:18}}>
+        <div style={{position:"absolute",left:0,top:0,height:"100%",width:`${Math.min(100,(totalPoints/750)*100)}%`,background:`linear-gradient(90deg,${C.accent2},${C.accent})`,borderRadius:4}}/>
+        {LEVELS.map((lv,i)=>{
+          if(i===0)return null;
+          const pct=(lv.min/750)*100;
+          const reached=totalPoints>=lv.min;
+          return <div key={i} style={{position:"absolute",left:`${pct}%`,top:"50%",transform:"translate(-50%,-50%)",width:12,height:12,borderRadius:"50%",background:reached?C.accent:"#fff",border:`2px solid ${reached?C.accent:C.border}`,zIndex:1}}/>
+        })}
+      </div>
+      {/* Level labels */}
+      <div style={{display:"flex",justifyContent:"space-between",marginBottom:12,marginTop:-10}}>
+        {LEVELS.map((lv,i)=><div key={i} style={{textAlign:"center",flex:1}}>
+          <div style={{fontSize:12,opacity:totalPoints>=lv.min?1:0.3}}>{lv.e}</div>
+        </div>)}
+      </div>
+      {/* Next level info */}
+      {nextLevel?<p style={{fontFamily:"Montserrat,sans-serif",fontSize:11,color:C.muted,margin:"0 0 10px",textAlign:"center"}}>↗ <b style={{color:C.ink}}>{nextLevel.min-totalPoints}</b> балів до <b style={{color:C.ink}}>{nextLevel.n}</b></p>:<p style={{fontFamily:"Montserrat,sans-serif",fontSize:11,color:C.gold,margin:"0 0 10px",textAlign:"center",fontWeight:600}}>🎓 Готовий до Кулінарного IQ</p>}
+      {/* Stats */}
+      <div style={{display:"flex",justifyContent:"space-around",borderTop:`1px solid ${C.border}`,paddingTop:10}}>
+        <div style={{textAlign:"center"}}>
+          <div style={{fontFamily:"Montserrat,sans-serif",fontSize:13,color:C.ink,fontWeight:600}}>📚 {totalCards}/{totalCardsMax}</div>
+          <div style={{fontFamily:"Montserrat,sans-serif",fontSize:9,color:C.muted}}>карток пройдено</div>
+        </div>
+        <div style={{textAlign:"center"}}>
+          <div style={{fontFamily:"Montserrat,sans-serif",fontSize:13,color:C.ink,fontWeight:600}}>🧠 {totalCorrect}/{totalQuizMax}</div>
+          <div style={{fontFamily:"Montserrat,sans-serif",fontSize:9,color:C.muted}}>правильних</div>
+        </div>
+      </div>
     </div>
-    <div style={{background:"#fff",borderRadius:12,padding:"14px 18px",border:`1px solid ${C.border}`}}><div style={{fontFamily:"Montserrat,sans-serif",fontSize:10,fontWeight:600,letterSpacing:1.5,color:C.muted,marginBottom:8}}>КУЛІНАРНИЙ IQ</div><div style={{display:"flex",alignItems:"center",gap:10}}><div style={{fontFamily:"Cormorant Garamond,serif",fontSize:28,fontWeight:600,color:C.ink}}>{iq}</div><div style={{flex:1}}><div style={{height:6,background:C.border,borderRadius:3,overflow:"hidden"}}><div style={{width:`${Math.min(100,iq/5)}%`,height:"100%",background:C.accent2,borderRadius:3}}/></div></div></div></div>
+
+    {/* LEARN BUTTON — archetype-specific */}
+    {targetBadge&&<button onClick={()=>onLearn(targetBadgeIdx)} style={{width:"100%",background:C.accent,color:"#fff",border:"none",borderRadius:14,padding:"18px 16px",cursor:"pointer",marginBottom:14,textAlign:"left"}}>
+      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
+        <span style={{fontSize:24}}>{targetBadge.e}</span>
+        <span style={{fontFamily:"Montserrat,sans-serif",fontSize:9,fontWeight:600,letterSpacing:1.5,opacity:0.85}}>ТВІЙ ШЛЯХ ЗНАНЬ</span>
+      </div>
+      <p style={{fontFamily:"Cormorant Garamond,serif",fontSize:18,fontWeight:500,margin:"0 0 6px",lineHeight:1.3}}>{learnHook}</p>
+      <p style={{fontFamily:"Montserrat,sans-serif",fontSize:11,opacity:0.85,margin:0}}>{targetBadge.n} · 10 карток · 7 питань</p>
+    </button>}
+
+    <p style={{fontFamily:"Montserrat,sans-serif",fontSize:10,fontWeight:600,letterSpacing:2,color:C.muted,marginBottom:10}}>ВСІ БЕЙДЖІ ({bdgs.filter(b=>b.done).length}/{bdgs.length})</p>
+    <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:6,marginBottom:20}}>
+      {bdgs.map((b,i)=>{
+        const isRec=i===recBadgeIdx&&!b.done;
+        return <button key={b.id} onClick={()=>onBdg(b,i)} style={{background:b.done?"#fff":isRec?C.accent+"15":C.paper2,border:`1px solid ${b.done?C.accent2+"40":isRec?C.accent+"60":C.border}`,borderRadius:12,padding:"10px 2px",cursor:"pointer",textAlign:"center",opacity:b.done?1:1}}>
+          <div style={{fontSize:24}}>{b.e}</div>
+          <div style={{fontFamily:"Montserrat,sans-serif",fontSize:7,color:b.done?C.ink:C.ink,marginTop:2}}>{b.n}</div>
+          {b.done&&<div style={{fontFamily:"Montserrat,sans-serif",fontSize:7,color:C.accent2,marginTop:1}}>✅ {b.qs}/7</div>}
+          {!b.done&&isRec&&<div style={{fontFamily:"Montserrat,sans-serif",fontSize:6,color:C.accent,marginTop:1,fontWeight:600}}>★ для тебе</div>}
+          {!b.done&&!isRec&&<div style={{fontFamily:"Montserrat,sans-serif",fontSize:6,color:C.muted,marginTop:1}}>10 карток</div>}
+        </button>
+      })}
+    </div>
     <BNav a="profile" go={go}/>
   </div>
 }
 
-function BModal({b,bi,curBdg,onL,onQ,onC}){const done=b.done;const locked=bi>curBdg&&!done;
-  return <div style={{position:"fixed",inset:0,display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,background:"rgba(0,0,0,.4)"}} onClick={onC}><div onClick={e=>e.stopPropagation()} style={{background:"#fff",borderRadius:20,padding:"28px 24px",maxWidth:320,width:"90%",textAlign:"center"}}><div style={{fontSize:52,marginBottom:8}}>{b.e}</div><h3 style={{fontFamily:"Cormorant Garamond,serif",fontSize:22,color:C.ink,margin:"0 0 4px"}}>{b.n}</h3><p style={{fontFamily:"Montserrat,sans-serif",fontSize:11,color:C.muted,margin:"0 0 16px"}}>{b.cat}</p>{done&&<div style={{background:C.accent2+"12",borderRadius:10,padding:"8px",marginBottom:12}}><p style={{fontFamily:"Montserrat,sans-serif",fontSize:12,color:C.accent2,margin:0}}>✅ Квіз: {b.qs}/7</p></div>}{locked?<p style={{fontFamily:"Montserrat,sans-serif",fontSize:13,color:C.muted}}>🔒 Спершу пройди попередні бейджі</p>:<div style={{display:"flex",flexDirection:"column",gap:8}}><button onClick={onL} style={{background:C.accent,color:"#fff",border:"none",borderRadius:10,padding:"14px",cursor:"pointer",fontFamily:"Montserrat,sans-serif",fontSize:13,fontWeight:600}}>📚 Навчання (10 карток)</button>{(done||bi<=curBdg)&&<button onClick={onQ} style={{background:C.ink,color:C.paper,border:"none",borderRadius:10,padding:"14px",cursor:"pointer",fontFamily:"Montserrat,sans-serif",fontSize:13,fontWeight:600}}>🧠 Квіз (7 питань)</button>}</div>}<button onClick={onC} style={{background:"transparent",border:"none",color:C.muted,marginTop:12,cursor:"pointer",fontFamily:"Montserrat,sans-serif",fontSize:12}}>Закрити</button></div></div>}
+function BModal({b,bi,curBdg,onL,onQ,onC}){const done=b.done;
+  return <div style={{position:"fixed",inset:0,display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,background:"rgba(0,0,0,.4)"}} onClick={onC}><div onClick={e=>e.stopPropagation()} style={{background:"#fff",borderRadius:20,padding:"28px 24px",maxWidth:320,width:"90%",textAlign:"center"}}><div style={{fontSize:52,marginBottom:8}}>{b.e}</div><h3 style={{fontFamily:"Cormorant Garamond,serif",fontSize:22,color:C.ink,margin:"0 0 4px"}}>{b.n}</h3><p style={{fontFamily:"Montserrat,sans-serif",fontSize:11,color:C.muted,margin:"0 0 16px"}}>{b.cat}</p>{done&&<div style={{background:C.accent2+"12",borderRadius:10,padding:"8px",marginBottom:12}}><p style={{fontFamily:"Montserrat,sans-serif",fontSize:12,color:C.accent2,margin:0}}>✅ Квіз: {b.qs}/7</p></div>}<div style={{display:"flex",flexDirection:"column",gap:8}}><button onClick={onL} style={{background:C.accent,color:"#fff",border:"none",borderRadius:10,padding:"14px",cursor:"pointer",fontFamily:"Montserrat,sans-serif",fontSize:13,fontWeight:600}}>📚 Навчання (10 карток)</button><button onClick={onQ} style={{background:C.ink,color:C.paper,border:"none",borderRadius:10,padding:"14px",cursor:"pointer",fontFamily:"Montserrat,sans-serif",fontSize:13,fontWeight:600}}>🧠 Квіз (7 питань)</button></div><button onClick={onC} style={{background:"transparent",border:"none",color:C.muted,marginTop:12,cursor:"pointer",fontFamily:"Montserrat,sans-serif",fontSize:12}}>Закрити</button></div></div>}
 
 function Learn({badgeIdx,coins,setCn,onD,go}){const bd=BADGE_DATA[badgeIdx];const cards=bd?bd.cards:[];const[i,si]=useState(0);const[kn,skn]=useState(0);const[dk,sdk]=useState(0);const[am,sam]=useState(false);const[bt,sbt]=useState(false);const[exp,sexp]=useState(false);const F=5,lm=bt?cards.length:F,c=cards[i],isPay=i>=lm&&!bt;
   useEffect(()=>{track("learn_start",{badge:bd?.id})},[]);
@@ -554,10 +724,10 @@ export default function App(){
     {showRec&&<RecPop badgeIdx={curBdg} onC={()=>ssr(false)}/>}
     {showAuth&&<AuthPrompt onLogin={()=>{setShowAuth(false);login()}} onSkip={()=>{setShowAuth(false);setShowShare(true)}}/>}
     {showShare&&arch&&<ShareCard arch={arch} onC={()=>setShowShare(false)}/>}
-    {actB&&scr==="profile"&&<BModal b={actB} bi={actBi} curBdg={curBdg} onL={()=>{sab(null);go("learn")}} onQ={()=>{sab(null);go("iqquiz")}} onC={()=>sab(null)}/>}
+    {actB&&scr==="profile"&&<BModal b={actB} bi={actBi} curBdg={curBdg} onL={()=>{sab(null);scb(actBi);go("learn")}} onQ={()=>{sab(null);scb(actBi);go("iqquiz")}} onC={()=>sab(null)}/>}
     {scr==="intro"&&<Intro go={()=>{addC(100,"Ласкаво просимо!");setTimeout(()=>go("archquiz"),1900)}}/>}
     {scr==="archquiz"&&<AQuiz onD={({answers,questions})=>{const r=calc(answers,questions);sa(r);track("archetype_result",{archetype:r.id,name:r.n});addC(50,"Архетип визначено!");setTimeout(()=>{go("profile");if(!user)setShowAuth(true);else setShowShare(true)},1900)}}/>}
-    {scr==="profile"&&arch&&<ProfileScr arch={arch} coins={coins} bdgs={bdgs} iq={iq} learned={learned} curBdg={curBdg} expanded={archExp} setExpanded={sae} go={go} onLearn={()=>{sae(false);track("learn_navigate",{badge:BADGE_DATA[curBdg]?.id});go("learn")}} onBdg={(b,i)=>{sab(b);sabi(i)}} onShare={()=>{track("share_open");setShowShare(true)}}/>}
+    {scr==="profile"&&arch&&<ProfileScr arch={arch} coins={coins} bdgs={bdgs} iq={iq} learned={learned} curBdg={curBdg} expanded={archExp} setExpanded={sae} go={go} onLearn={(idx)=>{sae(false);if(idx!=null&&idx>=0)scb(idx);track("learn_navigate",{badge:BADGE_DATA[idx??curBdg]?.id});go("learn")}} onBdg={(b,i)=>{sab(b);sabi(i)}} onShare={()=>{track("share_open");setShowShare(true)}}/>}
     {scr==="learn"&&<Learn badgeIdx={curBdg} coins={coins} setCn={sc} go={go} onD={s=>{sls(s);sl(l=>l+s.total);go("ldone")}}/>}
     {scr==="ldone"&&lSt&&<LDone stats={lSt} badgeIdx={curBdg} onRec={()=>ssr(true)} onBack={()=>{if(lSt.allDone){go("iqquiz")}else go("profile")}}/>}
     {scr==="iqquiz"&&<IQQuiz badgeIdx={curBdg} onD={score=>{const g=score*20;si(v=>v+g);sb(bs=>bs.map((b,i)=>i===curBdg?{...b,done:true,qs:score}:b));scb(c=>Math.min(c+1,BADGE_DATA.length-1));sae(false);track("badge_earned",{badge:bdgs[curBdg]?.id,name:bdgs[curBdg]?.n,score});sp({amt:0,txt:`${bdgs[curBdg]?.e} Бейдж "${bdgs[curBdg]?.n}" отримано!`});setTimeout(()=>go("profile"),1900)}}/>}
