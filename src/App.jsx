@@ -465,13 +465,15 @@ function ProfileScr({arch,coins,bdgs,iq,learned,curBdg,expanded,setExpanded,go,o
   const totalCardsMax=BADGE_DATA.reduce((s,b)=>s+(b.cards?.length||0),0);
   const totalQuizMax=BADGE_DATA.reduce((s,b)=>s+(b.quiz?.length||0),0);
   // Recommended badge for this archetype
-  const recBadgeIdx=arch?.id?ARCH_TO_BADGE[arch.id]??curBdg:curBdg;
+  const recBadgeIdx=arch?.id?ARCH_TO_BADGE[arch.id]??0:0;
   const recBadge=BADGE_DATA[recBadgeIdx];
-  const learnHook=arch?.id?ARCH_LEARN_HOOK[arch.id]:"Опануй секрети кулінарії";
+  const archHook=arch?.id?ARCH_LEARN_HOOK[arch.id]:"Опануй секрети кулінарії";
   const recBadgeDone=bdgs[recBadgeIdx]?.done;
   // If recommended badge is done, show next un-done badge
   const targetBadgeIdx=recBadgeDone?bdgs.findIndex(b=>!b.done):recBadgeIdx;
   const targetBadge=targetBadgeIdx>=0?BADGE_DATA[targetBadgeIdx]:null;
+  // Hook adapts: archetype hook for recommended, generic for fallback, congrats when all done
+  const learnHook=targetBadgeIdx<0?"🎓 Всі знання здобуто! Готовий до Кулінарного IQ":targetBadgeIdx===recBadgeIdx?archHook:`Наступний крок — ${targetBadge?.n}`;
 
   return <div style={{minHeight:"100vh",padding:"24px 24px 90px",maxWidth:480,margin:"0 auto"}}>
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
@@ -611,6 +613,7 @@ return <div style={{minHeight:"100vh",padding:"0 0 90px"}}><div style={{backgrou
 
 /* ═══ APP ═══ */
 export default function App(){
+  useEffect(()=>{document.title="Кулінарний Оракул"},[]);
   const[scr,ss]=useState("intro");
   const[arch,sa]=useState(null);
   const[coins,sc]=useState(0);
@@ -739,18 +742,25 @@ export default function App(){
 
 /* ═══ DASHBOARD ═══ */
 function Dashboard({go}){
-  const[events,setEvents]=useState([]);const[profiles,setProfiles]=useState([]);const[loading,setLoading]=useState(true);
+  const[allEvents,setAllEvents]=useState([]);const[allProfiles,setAllProfiles]=useState([]);const[loading,setLoading]=useState(true);
+  // Filter: "v2" (тільки нова версія, з 2026-04-29), "all" (всі дані)
+  const[filter,setFilter]=useState("v2");
+  const V2_DATE="2026-04-29T00:00:00Z";
   useEffect(()=>{
     (async()=>{
       const[e,p]=await Promise.all([
         supabase.from("events").select("*").order("created_at",{ascending:false}).limit(10000),
         supabase.from("profiles").select("*")
       ]);
-      setEvents(e.data||[]);setProfiles(p.data||[]);setLoading(false);
+      setAllEvents(e.data||[]);setAllProfiles(p.data||[]);setLoading(false);
     })();
   },[]);
 
   if(loading)return <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#1a1a2e"}}><p style={{color:"#fff",fontFamily:"Montserrat,sans-serif"}}>Завантаження...</p></div>;
+
+  // Apply filter
+  const events=filter==="v2"?allEvents.filter(e=>e.created_at>=V2_DATE):allEvents;
+  const profiles=filter==="v2"?allProfiles.filter(p=>p.updated_at>=V2_DATE||p.created_at>=V2_DATE):allProfiles;
 
   // Helpers
   const evOf=ev=>events.filter(e=>e.event===ev);
@@ -796,9 +806,13 @@ function Dashboard({go}){
   const funnelMax=Math.max(...funnelSteps.map(f=>f.uniq),1);
 
   return <div style={{minHeight:"100vh",background:S.bg,padding:"20px",maxWidth:600,margin:"0 auto"}}>
-    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
       <h1 style={{fontFamily:"Cormorant Garamond,serif",fontSize:24,color:S.text,margin:0}}>📊 Дашборд</h1>
       <button onClick={()=>go("profile")} style={{background:S.card,border:"none",color:S.muted,borderRadius:8,padding:"6px 12px",cursor:"pointer",fontFamily:S.font,fontSize:11}}>← Назад</button>
+    </div>
+    <div style={{display:"flex",gap:6,marginBottom:18}}>
+      <button onClick={()=>setFilter("v2")} style={{flex:1,background:filter==="v2"?S.blue:S.card,border:"none",color:filter==="v2"?"#fff":S.muted,borderRadius:8,padding:"8px",cursor:"pointer",fontFamily:S.font,fontSize:11,fontWeight:600}}>🔮 Оракул (v2)</button>
+      <button onClick={()=>setFilter("all")} style={{flex:1,background:filter==="all"?S.blue:S.card,border:"none",color:filter==="all"?"#fff":S.muted,borderRadius:8,padding:"8px",cursor:"pointer",fontFamily:S.font,fontSize:11,fontWeight:600}}>📚 Всі дані</button>
     </div>
 
     <Card title="Ключові метрики">
