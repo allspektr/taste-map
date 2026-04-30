@@ -6,46 +6,72 @@ const C={ink:"#1C1710",paper:"#F7F3EC",paper2:"#EDE7DB",accent:"#C4460A",accent2
 const track=async(event,data={})=>{try{const{data:{session}}=await supabase.auth.getSession();await supabase.from("events").insert({event,data,user_id:session?.user?.id||null})}catch(e){}};
 
 /* ═══ 24 ORACLE QUESTIONS — 6 per axis ═══ */
-const ALL_PAIRS=[
-// S/Cr — Природа vs Алхімія
-{q:"Бачиш ідеальний продукт. Твоє его дозволить йому просто бути?",emoji:"🍅",a:{l:"Лише сіль",v:"S"},b:{l:"Додам магії",v:"Cr"},axis:"S/Cr"},
-{q:"Хто ти сьогодні у цьому гастро-безумстві?",emoji:"🎭",a:{l:"Мудрий пурист",v:"S"},b:{l:"Шалений алхімік",v:"Cr"},axis:"S/Cr"},
-{q:"Ідеальний вечір. На столі одна страва. Вона...",emoji:"🍽️",a:{l:"Чесна простота",v:"S"},b:{l:"Складна симфонія",v:"Cr"},axis:"S/Cr"},
-{q:"Тобі дарують трюфель. Твоя перша думка?",emoji:"🍄",a:{l:"Настругати",v:"S"},b:{l:"Зробити соус",v:"Cr"},axis:"S/Cr"},
-{q:"Перед тобою стейк за $100. Твоя релігія дозволяє маринад?",emoji:"🥩",a:{l:"Лише сіль",v:"S"},b:{l:"Додам нюансів",v:"Cr"},axis:"S/Cr"},
-{q:"Ти знайшов ідеальний томат. Твій наступний крок?",emoji:"🍅",a:{l:"Просто вкушу",v:"S"},b:{l:"Зроблю гаспачо",v:"Cr"},axis:"S/Cr"},
-// R/Sp — Ритуал vs Спонтанність
-{q:"Дзвінок у двері за 20 хвилин. Твій внутрішній стан?",emoji:"🚪",a:{l:"Сталевий план",v:"R"},b:{l:"Повний джаз",v:"Sp"},axis:"R/Sp"},
-{q:"Ранок неділі. Твоя кухня сьогодні — це...",emoji:"☕",a:{l:"Ритуал",v:"R"},b:{l:"Веселий хаос",v:"Sp"},axis:"R/Sp"},
-{q:"В рецепті написано «за смаком». Твоя реакція?",emoji:"📖",a:{l:"Дратує. Дай грами",v:"R"},b:{l:"Нарешті! Свобода",v:"Sp"},axis:"R/Sp"},
-{q:"Готуєш для 10 людей. Твій підхід?",emoji:"👥",a:{l:"Таймінг/План",v:"R"},b:{l:"Буде що буде",v:"Sp"},axis:"R/Sp"},
-{q:"Новий кухонний гаджет у руках. Твої дії?",emoji:"🔪",a:{l:"Читаю мануал",v:"R"},b:{l:"Тисну кнопки",v:"Sp"},axis:"R/Sp"},
-{q:"Ти в супермаркеті. Твій шлях поміж рядами — це...",emoji:"🛒",a:{l:"Чіткий список",v:"R"},b:{l:"Куди занесе",v:"Sp"},axis:"R/Sp"},
-// P/A — Глибина vs Краса
-{q:"День — катастрофа. Чим будеш лікувати душу?",emoji:"💔",a:{l:"Ситне тепло",v:"P"},b:{l:"Витончена краса",v:"A"},axis:"P/A"},
-{q:"Створюєш шедевр. Твоя гордість тримається на...",emoji:"⭐",a:{l:"Потужному смаку",v:"P"},b:{l:"Бездоганному кадрі",v:"A"},axis:"P/A"},
-{q:"Вибір ресторану. Що вирішує?",emoji:"🍴",a:{l:"Порції та ситість",v:"P"},b:{l:"Атмосфера/Подача",v:"A"},axis:"P/A"},
-{q:"Запрошення на ТБ-шоу. Твоя стратегія?",emoji:"📺",a:{l:"Зроблю найсмачніше",v:"P"},b:{l:"Зроблю найкрасивіше",v:"A"},axis:"P/A"},
-{q:"Викладаєш страву на тарілку. Внутрішній голос каже:",emoji:"🍽️",a:{l:"«Аби гаряче»",v:"P"},b:{l:"«Ще один штрих»",v:"A"},axis:"P/A"},
-{q:"Найкращий комплімент твоєму таланту:",emoji:"💬",a:{l:"«Я наївся!»",v:"P"},b:{l:"«Це шедевр!»",v:"A"},axis:"P/A"},
-// C/E — Знайоме vs Невідоме
-{q:"У меню назва, схожа на закляття. Твоя реакція?",emoji:"📜",a:{l:"Дайте знайоме",v:"C"},b:{l:"Везіть невідомість",v:"E"},axis:"C/E"},
-{q:"Тобі кажуть: «Це занадто дивно!». Твій мозок видає:",emoji:"🤔",a:{l:"Треба виправити",v:"C"},b:{l:"Це комплімент!",v:"E"},axis:"C/E"},
-{q:"Відпустка. Перед обідом ти...",emoji:"✈️",a:{l:"Читаю топ-10",v:"C"},b:{l:"Йду на запах",v:"E"},axis:"C/E"},
-{q:"Готуєш улюблену страву. Ти...",emoji:"❤️",a:{l:"Не змінюю роками",v:"C"},b:{l:"Постійно експериментую",v:"E"},axis:"C/E"},
-{q:"Відкриваєш меню на 20 сторінок. Палець шукає:",emoji:"📋",a:{l:"Знайому гавань",v:"C"},b:{l:"Квиток у пригоду",v:"E"},axis:"C/E"},
-{q:"Шеф каже: «Я приготую імпровізацію». Твій стан?",emoji:"👨‍🍳",a:{l:"Розкажи спершу",v:"C"},b:{l:"Я в твоїх руках",v:"E"},axis:"C/E"},
+/* ═══ WARMUP QUESTIONS (2 — на початку, для входу в гру) ═══ */
+const WARMUP_PAIRS=[
+{q:"Швидкий вибір. Що ближче?",emoji:"⚡",a:{l:"🥩 М'ясо",v:""},b:{l:"🥗 Овочі",v:""},axis:"warmup"},
+{q:"На кухні ти готуєш частіше для:",emoji:"👥",a:{l:"Себе",v:""},b:{l:"Інших",v:""},axis:"warmup"},
 ];
 
-// Pick 4 random questions per axis = 16 total
+/* ═══ MAIN QUESTION BANK v3.2 — 32 питання, по 8 на вісь ═══ */
+const ALL_PAIRS=[
+// БЛОК 1: S/Cr — Природа vs Алхімія (8)
+{q:"Свіжа полуниця. Твій варіант?",emoji:"🍓",a:{l:"Чистий смак",v:"S"},b:{l:"Вершки і цукор",v:"Cr"},axis:"S/Cr"},
+{q:"Твоя кухонна полиця. Що там?",emoji:"🧂",a:{l:"5 ідеальних спецій",v:"S"},b:{l:"50 рідкісних спецій",v:"Cr"},axis:"S/Cr"},
+{q:"Друг хвалиться вечерею. Твоє перше питання:",emoji:"💬",a:{l:"Звідки продукти?",v:"S"},b:{l:"Як готував?",v:"Cr"},axis:"S/Cr"},
+{q:"Що тебе більше вражає в кухарі?",emoji:"👨‍🍳",a:{l:"Не зіпсувати продукт",v:"S"},b:{l:"Поєднати непоєднуване",v:"Cr"},axis:"S/Cr"},
+{q:"Свіже філе курки на дошці. План:",emoji:"🍗",a:{l:"Швидко до скоринки",v:"S"},b:{l:"Маринувати на ніч",v:"Cr"},axis:"S/Cr"},
+{q:"Тиждень був пеклом. Що приготуєш собі на вихідні?",emoji:"😮‍💨",a:{l:"Один ідеальний продукт",v:"S"},b:{l:"Зануритись у складний процес",v:"Cr"},axis:"S/Cr"},
+{q:"Тобі дарують 100$ на кулінарію. Куди?",emoji:"💰",a:{l:"На один ідеальний інгредієнт",v:"S"},b:{l:"На набір нових інструментів",v:"Cr"},axis:"S/Cr"},
+{q:"Що для тебе 'wow' момент в їжі?",emoji:"✨",a:{l:"Продукт смакує як справжній",v:"S"},b:{l:"Смак неочікуваний і складний",v:"Cr"},axis:"S/Cr"},
+
+// БЛОК 2: R/Sp — Ритуал vs Спонтанність (8)
+{q:"Майже порожній холодильник. Імпульс:",emoji:"🧊",a:{l:"Іду по конкретні продукти",v:"R"},b:{l:"Готую з того що бачу",v:"Sp"},axis:"R/Sp"},
+{q:"Готуєш за складним рецептом. Як вимірюєш?",emoji:"⚖️",a:{l:"Точність рецепту",v:"R"},b:{l:"Голос інтуїції",v:"Sp"},axis:"R/Sp"},
+{q:"Запросив гостей. Меню:",emoji:"📅",a:{l:"Складене заздалегідь",v:"R"},b:{l:"Вирішу в день вечері",v:"Sp"},axis:"R/Sp"},
+{q:"Купуєш продукти на тиждень. Як?",emoji:"🛒",a:{l:"За списком",v:"R"},b:{l:"Що впаде в око",v:"Sp"},axis:"R/Sp"},
+{q:"Готуєш, щось пішло не так. Реакція:",emoji:"🔥",a:{l:"Розбираюсь що сталось",v:"R"},b:{l:"Адаптуюсь і йду далі",v:"Sp"},axis:"R/Sp"},
+{q:"Твій ідеальний сніданок — це...",emoji:"🍳",a:{l:"Улюблений ритуал",v:"R"},b:{l:"Щось нове кожного ранку",v:"Sp"},axis:"R/Sp"},
+{q:"Як виглядає твоя кухня в процесі?",emoji:"🍽️",a:{l:"Повний порядок",v:"R"},b:{l:"Творчий безлад",v:"Sp"},axis:"R/Sp"},
+{q:"Перший вечір у новому місті. Як знайдеш де поїсти?",emoji:"🌃",a:{l:"Перевірю відгуки",v:"R"},b:{l:"Іду на запах",v:"Sp"},axis:"R/Sp"},
+
+// БЛОК 3: P/A — Глибина vs Краса (8)
+{q:"Страва смачна, але подана неохайно. Відчуття?",emoji:"🤷",a:{l:"Не має значення",v:"P"},b:{l:"Це псує задоволення",v:"A"},axis:"P/A"},
+{q:"Купуєш собі ідеальну вечерю. Що головне:",emoji:"🍴",a:{l:"Смак / продукти",v:"P"},b:{l:"Атмосфера / локація",v:"A"},axis:"P/A"},
+{q:"Шедевральна страва. Перша дія?",emoji:"🌟",a:{l:"Одразу відрізаю шматок",v:"P"},b:{l:"Завмираю вдихнути аромат",v:"A"},axis:"P/A"},
+{q:"Вечеряєш один вдома. Як це виглядає?",emoji:"🌙",a:{l:"Швидко і смачно",v:"P"},b:{l:"Повільно і красиво",v:"A"},axis:"P/A"},
+{q:"Запам'ятовуєш страву через:",emoji:"🧠",a:{l:"Смак на язиці",v:"P"},b:{l:"Картинку в пам'яті",v:"A"},axis:"P/A"},
+{q:"За що готовий більше платити в ресторані:",emoji:"💳",a:{l:"За бездоганну їжу",v:"P"},b:{l:"За сервіс і комфорт",v:"A"},axis:"P/A"},
+{q:"На вечері з друзями про страву кажеш:",emoji:"😍",a:{l:"Це божественно смачно",v:"P"},b:{l:"Це божественно красиво",v:"A"},axis:"P/A"},
+{q:"Що для тебе справжнє визнання таланту?",emoji:"🏆",a:{l:"Гості мовчки з'їли все",v:"P"},b:{l:"Всі сфотографували подачу",v:"A"},axis:"P/A"},
+
+// БЛОК 4: C/E — Знайоме vs Невідоме (8)
+{q:"У меню улюблена страва і екзотична новинка. Вибір?",emoji:"📜",a:{l:"Перевірений смак",v:"C"},b:{l:"Ризикну спробувати нове",v:"E"},axis:"C/E"},
+{q:"Що відчуваєш після ідеальної вечері?",emoji:"😌",a:{l:"Замовкнути в моменті",v:"C"},b:{l:"Ділитися враженнями",v:"E"},axis:"C/E"},
+{q:"Поганий день. Вечеря:",emoji:"💔",a:{l:"Те що заспокоює",v:"C"},b:{l:"Щось нове, дай вийти з настрою",v:"E"},axis:"C/E"},
+{q:"Твоя ідеальна тарілка — це...",emoji:"🍽️",a:{l:"Мій особистий простір",v:"C"},b:{l:"Спільні тарілки",v:"E"},axis:"C/E"},
+{q:"У меню 'Морозиво з перцем чилі'. Реакція:",emoji:"🌶️",a:{l:"Це занадто",v:"C"},b:{l:"Замовляю одразу",v:"E"},axis:"C/E"},
+{q:"Де краще відпочинеш ввечері?",emoji:"🏠",a:{l:"Тиха вечеря вдома",v:"C"},b:{l:"Гучний гастро-бар",v:"E"},axis:"C/E"},
+{q:"Кулінарна мрія:",emoji:"💫",a:{l:"Зберегти секрет родини",v:"C"},b:{l:"Винайти нову страву",v:"E"},axis:"C/E"},
+{q:"Що для тебе 'ідеальна вечеря':",emoji:"🌟",a:{l:"Те що я знаю",v:"C"},b:{l:"Те що мене здивує",v:"E"},axis:"C/E"},
+];
+
+/* ═══ DATA COLLECTION (3 в кінці — для персоналізації звіту) ═══ */
+const DATA_PAIRS=[
+{q:"Скільки тобі років?",emoji:"🎂",options:[{l:"До 25",v:"age_under25"},{l:"25-34",v:"age_25_34"},{l:"35-44",v:"age_35_44"},{l:"45+",v:"age_45plus"}],axis:"data",key:"age"},
+{q:"Як часто готуєш вдома?",emoji:"🥘",options:[{l:"Щодня",v:"freq_daily"},{l:"Кілька разів на тиждень",v:"freq_weekly"},{l:"Рідко",v:"freq_rare"}],axis:"data",key:"frequency"},
+{q:"Для кого готуєш найчастіше?",emoji:"👨‍👩‍👧",options:[{l:"Сам",v:"for_self"},{l:"Партнер",v:"for_partner"},{l:"Сім'я",v:"for_family"},{l:"Гості",v:"for_guests"}],axis:"data",key:"audience"},
+];
+
+// Pick 6 random questions per axis = 24 total (з банку по 8 на вісь)
 const pickQuestions=()=>{
   const byAxis={};
   ALL_PAIRS.forEach(p=>{if(!byAxis[p.axis])byAxis[p.axis]=[];byAxis[p.axis].push(p)});
   const result=[];
   Object.values(byAxis).forEach(arr=>{
     const shuffled=[...arr].sort(()=>Math.random()-0.5);
-    result.push(...shuffled.slice(0,4));
+    result.push(...shuffled.slice(0,6));
   });
+  // Mix axes throughout the quiz (not all S/Cr first, then all R/Sp)
   return result.sort(()=>Math.random()-0.5);
 };
 
@@ -388,13 +414,13 @@ function Intro({go}){
     </p>
     <div style={{background:C.paper2,borderRadius:14,padding:"18px 22px",maxWidth:420,marginBottom:32,textAlign:"left"}}>
       <p style={{fontFamily:"Cormorant Garamond,serif",fontSize:15,color:C.ink,margin:"0 0 10px",lineHeight:1.5}}>
-        Я задам тобі <b>16 запитань про кухню</b> — про вогонь, продукти, ритуали і твої смакові звички.
+        Я задам тобі <b>близько 30 запитань про кухню</b> — про вогонь, продукти, ритуали і твої смакові звички.
       </p>
       <p style={{fontFamily:"Cormorant Garamond,serif",fontSize:15,color:C.ink,margin:"0 0 10px",lineHeight:1.5}}>
         У відповідь розповім хто ти на кухні, в чому твоя сила, і яка тінь чекає за дверима.
       </p>
       <p style={{fontFamily:"Montserrat,sans-serif",fontSize:11,color:C.muted,margin:0,letterSpacing:0.5}}>
-        ⏱ 2 хвилини · 16 питань · 1 правда про тебе
+        ⏱ 3-4 хвилини · 1 правда про тебе
       </p>
     </div>
     <button onClick={()=>{track("quiz_start");go()}} style={{background:C.ink,color:C.paper,border:"none",borderRadius:10,padding:"16px 48px",fontFamily:"Cormorant Garamond,serif",fontSize:20,letterSpacing:2,cursor:"pointer"}}>ПОЧАТИ</button>
@@ -402,26 +428,73 @@ function Intro({go}){
 }
 
 function AQuiz({onD}){
-  const[questions]=useState(()=>pickQuestions());
+  // Build full sequence: warmup + main 24 (random from 32) + data collection
+  const[allQuestions]=useState(()=>{
+    const main=pickQuestions(); // 24 random from 32
+    return [...WARMUP_PAIRS,...main,...DATA_PAIRS];
+  });
   const[s,ss]=useState(0);
   const[a,sa]=useState([]);
   const[am,sam]=useState(null);
-  const p=questions[s];
-  const total=questions.length;
-  const pk=sd=>{
+  const[dataAnswers,setDataAnswers]=useState({});
+  const p=allQuestions[s];
+  const total=allQuestions.length;
+  const isData=p?.axis==="data";
+  const isWarmup=p?.axis==="warmup";
+
+  // Determine section label for progress
+  const sectionLabel=isWarmup?"Розминка":isData?"Останні штрихи":"Гра Оракула";
+  const sectionColor=isWarmup?C.accent2:isData?C.gold:C.accent;
+
+  const pickBinary=sd=>{
     sam(sd);
     const choice=sd==="a"?p.a.l:p.b.l;
-    track("archquiz_answer",{q:s+1,question:p.q,axis:p.axis,choice});
+    if(!isWarmup){
+      track("archquiz_answer",{q:s+1,question:p.q,axis:p.axis,choice});
+    }
     setTimeout(()=>{
       const n=[...a,sd];
-      if(n.length>=total){track("archquiz_complete");onD({answers:n,questions})}
-      else{sa(n);ss(s+1);sam(null)}
+      goNext(n);
+      sam(null);
     },280);
   };
+
+  const pickData=opt=>{
+    sam(opt.v);
+    track("data_answer",{key:p.key,value:opt.v});
+    const newData={...dataAnswers,[p.key]:opt.v};
+    setDataAnswers(newData);
+    setTimeout(()=>{
+      const n=[...a,opt.v];
+      goNext(n,newData);
+      sam(null);
+    },280);
+  };
+
+  const goNext=(n,newData)=>{
+    if(s+1>=total){
+      track("archquiz_complete");
+      // Filter answers for archetype calculation: skip warmup and data questions
+      const mainAnswers=[];
+      const mainQuestions=[];
+      n.forEach((ans,i)=>{
+        const q=allQuestions[i];
+        if(q.axis!=="warmup"&&q.axis!=="data"){
+          mainAnswers.push(ans);
+          mainQuestions.push(q);
+        }
+      });
+      onD({answers:mainAnswers,questions:mainQuestions,dataAnswers:newData||dataAnswers});
+    }else{
+      sa(n);
+      ss(s+1);
+    }
+  };
+
   if(!p)return null;
-  // Bold first significant noun/verb in the question
+
+  // Bold first significant phrase in the question
   const renderQuestion=(text)=>{
-    // Find first comma/period to bold the first phrase if it's a setup
     const parts=text.split(/(\.|,|—|:)/);
     if(parts.length>=2){
       return <>
@@ -431,26 +504,41 @@ function AQuiz({onD}){
     }
     return text;
   };
+
   return <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",padding:"24px"}}>
-    <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:28}}>
+    <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:8}}>
       <div style={{flex:1,height:4,background:C.border,borderRadius:2,overflow:"hidden"}}>
-        <div style={{width:`${(s/total)*100}%`,height:"100%",background:C.accent,borderRadius:2,transition:"width .3s"}}/>
+        <div style={{width:`${(s/total)*100}%`,height:"100%",background:sectionColor,borderRadius:2,transition:"width .3s, background .3s"}}/>
       </div>
       <span style={{fontFamily:"Montserrat,sans-serif",fontSize:13,color:C.muted,fontWeight:600}}>{s+1}/{total}</span>
+    </div>
+    <div style={{textAlign:"center",marginBottom:20}}>
+      <span style={{fontFamily:"Montserrat,sans-serif",fontSize:9,fontWeight:600,letterSpacing:2,color:sectionColor,textTransform:"uppercase"}}>{sectionLabel}</span>
     </div>
     <div style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"center",gap:24,maxWidth:480,margin:"0 auto",width:"100%"}}>
       <div style={{textAlign:"center"}}>
         <div style={{fontSize:48,marginBottom:14,lineHeight:1}}>{p.emoji||"🔮"}</div>
         <p style={{fontFamily:"Cormorant Garamond,serif",fontSize:22,color:C.ink,fontStyle:"italic",margin:0,lineHeight:1.45,padding:"0 8px"}}>{renderQuestion(p.q)}</p>
       </div>
-      <div style={{display:"flex",flexDirection:"column",gap:12}}>
-        {["a","b"].map(sd=>{
-          const o=p[sd],iA=am===sd,iO=am&&am!==sd;
-          return <button key={sd} onClick={()=>!am&&pk(sd)} style={{background:"#fff",border:`2px solid ${iA?C.accent:C.border}`,borderRadius:14,padding:"20px 24px",cursor:am?"default":"pointer",textAlign:"center",transition:"all .25s",transform:iA?"scale(1.03)":iO?"scale(.97)":"none",opacity:iO?.4:1}}>
-            <span style={{fontFamily:"Cormorant Garamond,serif",fontSize:20,fontWeight:500,color:C.ink}}>{o.l}</span>
-          </button>
-        })}
-      </div>
+      {isData?(
+        <div style={{display:"flex",flexDirection:"column",gap:10}}>
+          {p.options.map((opt,i)=>{
+            const iA=am===opt.v,iO=am&&am!==opt.v;
+            return <button key={i} onClick={()=>!am&&pickData(opt)} style={{background:"#fff",border:`2px solid ${iA?sectionColor:C.border}`,borderRadius:14,padding:"16px 24px",cursor:am?"default":"pointer",textAlign:"center",transition:"all .25s",transform:iA?"scale(1.03)":iO?"scale(.97)":"none",opacity:iO?.4:1}}>
+              <span style={{fontFamily:"Cormorant Garamond,serif",fontSize:18,fontWeight:500,color:C.ink}}>{opt.l}</span>
+            </button>
+          })}
+        </div>
+      ):(
+        <div style={{display:"flex",flexDirection:"column",gap:12}}>
+          {["a","b"].map(sd=>{
+            const o=p[sd],iA=am===sd,iO=am&&am!==sd;
+            return <button key={sd} onClick={()=>!am&&pickBinary(sd)} style={{background:"#fff",border:`2px solid ${iA?sectionColor:C.border}`,borderRadius:14,padding:"20px 24px",cursor:am?"default":"pointer",textAlign:"center",transition:"all .25s",transform:iA?"scale(1.03)":iO?"scale(.97)":"none",opacity:iO?.4:1}}>
+              <span style={{fontFamily:"Cormorant Garamond,serif",fontSize:20,fontWeight:500,color:C.ink}}>{o.l}</span>
+            </button>
+          })}
+        </div>
+      )}
     </div>
   </div>
 }
@@ -729,7 +817,7 @@ export default function App(){
     {showShare&&arch&&<ShareCard arch={arch} onC={()=>setShowShare(false)}/>}
     {actB&&scr==="profile"&&<BModal b={actB} bi={actBi} curBdg={curBdg} onL={()=>{sab(null);scb(actBi);go("learn")}} onQ={()=>{sab(null);scb(actBi);go("iqquiz")}} onC={()=>sab(null)}/>}
     {scr==="intro"&&<Intro go={()=>{addC(100,"Ласкаво просимо!");setTimeout(()=>go("archquiz"),1900)}}/>}
-    {scr==="archquiz"&&<AQuiz onD={({answers,questions})=>{const r=calc(answers,questions);sa(r);track("archetype_result",{archetype:r.id,name:r.n});addC(50,"Архетип визначено!");setTimeout(()=>{go("profile");if(!user)setShowAuth(true);else setShowShare(true)},1900)}}/>}
+    {scr==="archquiz"&&<AQuiz onD={({answers,questions,dataAnswers})=>{const r=calc(answers,questions);sa(r);track("archetype_result",{archetype:r.id,name:r.n,...dataAnswers});addC(50,"Архетип визначено!");setTimeout(()=>{go("profile");if(!user)setShowAuth(true);else setShowShare(true)},1900)}}/>}
     {scr==="profile"&&arch&&<ProfileScr arch={arch} coins={coins} bdgs={bdgs} iq={iq} learned={learned} curBdg={curBdg} expanded={archExp} setExpanded={sae} go={go} onLearn={(idx)=>{sae(false);if(idx!=null&&idx>=0)scb(idx);track("learn_navigate",{badge:BADGE_DATA[idx??curBdg]?.id});go("learn")}} onBdg={(b,i)=>{sab(b);sabi(i)}} onShare={()=>{track("share_open");setShowShare(true)}}/>}
     {scr==="learn"&&<Learn badgeIdx={curBdg} coins={coins} setCn={sc} go={go} onD={s=>{sls(s);sl(l=>l+s.total);go("ldone")}}/>}
     {scr==="ldone"&&lSt&&<LDone stats={lSt} badgeIdx={curBdg} onRec={()=>ssr(true)} onBack={()=>{if(lSt.allDone){go("iqquiz")}else go("profile")}}/>}
@@ -743,9 +831,10 @@ export default function App(){
 /* ═══ DASHBOARD ═══ */
 function Dashboard({go}){
   const[allEvents,setAllEvents]=useState([]);const[allProfiles,setAllProfiles]=useState([]);const[loading,setLoading]=useState(true);
-  // Filter: "v2" (тільки нова версія, з 2026-04-29), "all" (всі дані)
-  const[filter,setFilter]=useState("v2");
+  // Filter: "v3" (тільки v3.2 квіз), "v2" (з 2026-04-29), "all" (всі дані)
+  const[filter,setFilter]=useState("v3");
   const V2_DATE="2026-04-29T00:00:00Z";
+  const V3_DATE="2026-04-30T00:00:00Z";
   useEffect(()=>{
     (async()=>{
       const[e,p]=await Promise.all([
@@ -759,8 +848,9 @@ function Dashboard({go}){
   if(loading)return <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#1a1a2e"}}><p style={{color:"#fff",fontFamily:"Montserrat,sans-serif"}}>Завантаження...</p></div>;
 
   // Apply filter
-  const events=filter==="v2"?allEvents.filter(e=>e.created_at>=V2_DATE):allEvents;
-  const profiles=filter==="v2"?allProfiles.filter(p=>p.updated_at>=V2_DATE||p.created_at>=V2_DATE):allProfiles;
+  const cutoff=filter==="v3"?V3_DATE:filter==="v2"?V2_DATE:null;
+  const events=cutoff?allEvents.filter(e=>e.created_at>=cutoff):allEvents;
+  const profiles=cutoff?allProfiles.filter(p=>(p.updated_at||p.created_at)>=cutoff):allProfiles;
 
   // Helpers
   const evOf=ev=>events.filter(e=>e.event===ev);
@@ -791,6 +881,22 @@ function Dashboard({go}){
   const quizAnswers={};
   evOf("archquiz_answer").forEach(e=>{const q=e.data?.question;const ch=e.data?.choice;const ax=e.data?.axis;if(q){if(!quizAnswers[q])quizAnswers[q]={question:q,axis:ax,answers:{},users:new Set()};quizAnswers[q].answers[ch]=(quizAnswers[q].answers[ch]||0)+1;quizAnswers[q].users.add(e.user_id||e.id)}});
 
+  // Data collection aggregation
+  const dataStats={};
+  const DATA_KEYS={age:"Вік",frequency:"Частота готування",audience:"Готує для"};
+  const DATA_LABELS={
+    age_under25:"До 25",age_25_34:"25-34",age_35_44:"35-44",age_45plus:"45+",
+    freq_daily:"Щодня",freq_weekly:"Кілька разів на тиждень",freq_rare:"Рідко",
+    for_self:"Сам",for_partner:"Партнер",for_family:"Сім'я",for_guests:"Гості"
+  };
+  evOf("data_answer").forEach(e=>{
+    const key=e.data?.key;const val=e.data?.value;
+    if(!key||!val)return;
+    if(!dataStats[key])dataStats[key]={values:{},users:new Set()};
+    dataStats[key].values[val]=(dataStats[key].values[val]||0)+1;
+    dataStats[key].users.add(e.user_id||e.id);
+  });
+
   // Learning cards
   const learnCards={};
   evOf("learn_card").forEach(e=>{const k=`${e.data?.badge}:${e.data?.card}`;if(!learnCards[k])learnCards[k]={badge:e.data?.badge,card:e.data?.card,hook:e.data?.hook,knew:0,didnt:0,users:new Set()};if(e.data?.knew)learnCards[k].knew++;else learnCards[k].didnt++;learnCards[k].users.add(e.user_id||e.id)});
@@ -811,8 +917,9 @@ function Dashboard({go}){
       <button onClick={()=>go("profile")} style={{background:S.card,border:"none",color:S.muted,borderRadius:8,padding:"6px 12px",cursor:"pointer",fontFamily:S.font,fontSize:11}}>← Назад</button>
     </div>
     <div style={{display:"flex",gap:6,marginBottom:18}}>
-      <button onClick={()=>setFilter("v2")} style={{flex:1,background:filter==="v2"?S.blue:S.card,border:"none",color:filter==="v2"?"#fff":S.muted,borderRadius:8,padding:"8px",cursor:"pointer",fontFamily:S.font,fontSize:11,fontWeight:600}}>🔮 Оракул (v2)</button>
-      <button onClick={()=>setFilter("all")} style={{flex:1,background:filter==="all"?S.blue:S.card,border:"none",color:filter==="all"?"#fff":S.muted,borderRadius:8,padding:"8px",cursor:"pointer",fontFamily:S.font,fontSize:11,fontWeight:600}}>📚 Всі дані</button>
+      <button onClick={()=>setFilter("v3")} style={{flex:1,background:filter==="v3"?S.blue:S.card,border:"none",color:filter==="v3"?"#fff":S.muted,borderRadius:8,padding:"8px",cursor:"pointer",fontFamily:S.font,fontSize:11,fontWeight:600}}>🔮 v3.2 (новий квіз)</button>
+      <button onClick={()=>setFilter("v2")} style={{flex:1,background:filter==="v2"?S.blue:S.card,border:"none",color:filter==="v2"?"#fff":S.muted,borderRadius:8,padding:"8px",cursor:"pointer",fontFamily:S.font,fontSize:11,fontWeight:600}}>🌙 Оракул v2</button>
+      <button onClick={()=>setFilter("all")} style={{flex:1,background:filter==="all"?S.blue:S.card,border:"none",color:filter==="all"?"#fff":S.muted,borderRadius:8,padding:"8px",cursor:"pointer",fontFamily:S.font,fontSize:11,fontWeight:600}}>📚 Все</button>
     </div>
 
     <Card title="Ключові метрики">
@@ -860,23 +967,64 @@ function Dashboard({go}){
       </div>)}
     </Card>}
 
-    {Object.keys(quizAnswers).length>0&&<Card title="Квіз архетипу — відповіді по питаннях">
-      {Object.entries(quizAnswers).map(([q,data])=>{
-        const total=Object.values(data.answers).reduce((s,v)=>s+v,0);
-        return <div key={q} style={{marginBottom:14,padding:"10px",background:S.accent,borderRadius:8}}>
+    {Object.keys(dataStats).length>0&&<Card title="Демографія аудиторії">
+      {Object.entries(dataStats).map(([key,data])=>{
+        const total=Object.values(data.values).reduce((s,v)=>s+v,0);
+        const sorted=Object.entries(data.values).sort((a,b)=>b[1]-a[1]);
+        return <div key={key} style={{marginBottom:14,padding:"10px",background:S.accent,borderRadius:8}}>
           <div style={{display:"flex",justifyContent:"space-between",marginBottom:6,gap:8}}>
-            <span style={{fontFamily:S.font,fontSize:10,color:S.text,flex:1}}>{data.question}{data.axis?` [${data.axis}]`:""}</span>
-            <span style={{fontFamily:S.font,fontSize:9,color:S.muted,whiteSpace:"nowrap"}}>{data.users.size} юз.</span>
+            <span style={{fontFamily:S.font,fontSize:11,color:S.text,fontWeight:600}}>{DATA_KEYS[key]||key}</span>
+            <span style={{fontFamily:S.font,fontSize:9,color:S.muted}}>{data.users.size} юз.</span>
           </div>
-          {Object.entries(data.answers).sort((a,b)=>b[1]-a[1]).map(([ans,cnt],i)=><div key={i} style={{marginBottom:4}}>
+          {sorted.map(([val,cnt],i)=><div key={i} style={{marginBottom:4}}>
             <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
-              <span style={{fontFamily:S.font,fontSize:10,color:S.text}}>{ans}</span>
+              <span style={{fontFamily:S.font,fontSize:10,color:S.text}}>{DATA_LABELS[val]||val}</span>
               <span style={{fontFamily:S.font,fontSize:10,color:i===0?S.blue:S.muted}}>{cnt} ({Math.round(cnt/total*100)}%)</span>
             </div>
             <div style={{height:3,background:"#0a1628",borderRadius:2,overflow:"hidden"}}><div style={{width:`${(cnt/total)*100}%`,height:"100%",background:i===0?S.blue:S.muted+"60",borderRadius:2}}/></div>
           </div>)}
         </div>
       })}
+    </Card>}
+
+    {Object.keys(quizAnswers).length>0&&<Card title="Квіз архетипу — відповіді по питаннях">
+      {(()=>{
+        // Group questions by axis
+        const groups={};
+        Object.entries(quizAnswers).forEach(([q,d])=>{
+          const ax=d.axis||"other";
+          if(!groups[ax])groups[ax]=[];
+          groups[ax].push([q,d]);
+        });
+        const AX_ORDER=["S/Cr","R/Sp","P/A","C/E","warmup","other"];
+        const AX_NAMES={"S/Cr":"🌿 Природа / Алхімія","R/Sp":"⏰ Ритуал / Спонтанність","P/A":"💎 Глибина / Краса","C/E":"🚪 Знайоме / Невідоме","warmup":"⚡ Розминка","other":"Інше"};
+        const AX_COLORS={"S/Cr":"#C4460A","R/Sp":"#2A6B4A","P/A":"#1A4A6E","C/E":"#B8860B","warmup":"#9A8F7E","other":"#9A8F7E"};
+        return AX_ORDER.filter(ax=>groups[ax]?.length>0).map(ax=>(
+          <div key={ax} style={{marginBottom:18}}>
+            <div style={{fontFamily:S.font,fontSize:10,fontWeight:700,color:AX_COLORS[ax],letterSpacing:1.5,marginBottom:8,textTransform:"uppercase"}}>{AX_NAMES[ax]||ax}</div>
+            {groups[ax].map(([q,data])=>{
+              const total=Object.values(data.answers).reduce((s,v)=>s+v,0);
+              const sorted=Object.entries(data.answers).sort((a,b)=>b[1]-a[1]);
+              const topPct=total>0?Math.round(sorted[0][1]/total*100):0;
+              const isBalanced=topPct>=40&&topPct<=60;
+              const isSkewed=topPct>=75;
+              return <div key={q} style={{marginBottom:10,padding:"10px",background:S.accent,borderRadius:8,borderLeft:`3px solid ${isBalanced?"#2A6B4A":isSkewed?"#C4460A":AX_COLORS[ax]}`}}>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:6,gap:8}}>
+                  <span style={{fontFamily:S.font,fontSize:10,color:S.text,flex:1}}>{data.question}</span>
+                  <span style={{fontFamily:S.font,fontSize:9,color:S.muted,whiteSpace:"nowrap"}}>{data.users.size}</span>
+                </div>
+                {sorted.map(([ans,cnt],i)=><div key={i} style={{marginBottom:4}}>
+                  <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
+                    <span style={{fontFamily:S.font,fontSize:10,color:S.text}}>{ans}</span>
+                    <span style={{fontFamily:S.font,fontSize:10,color:i===0?S.blue:S.muted}}>{cnt} ({Math.round(cnt/total*100)}%)</span>
+                  </div>
+                  <div style={{height:3,background:"#0a1628",borderRadius:2,overflow:"hidden"}}><div style={{width:`${(cnt/total)*100}%`,height:"100%",background:i===0?S.blue:S.muted+"60",borderRadius:2}}/></div>
+                </div>)}
+              </div>;
+            })}
+          </div>
+        ));
+      })()}
     </Card>}
 
     {Object.keys(learnCards).length>0&&<Card title="Навчальні картки — знав / не знав">
